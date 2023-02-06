@@ -17,6 +17,7 @@ import com.sap.conn.jco.JCoTable;
 import com.sap.conn.jco.rt.DefaultTable;
 
 import de.jlo.talendcomp.sap.TableInput;
+import de.jlo.talendcomp.sap.TextSplitter;
 
 /**
  * Copyright 2023 Jan Lolling jan.lolling@gmail.com
@@ -48,6 +49,7 @@ public class TableInputImpl implements TableInput {
 	private Integer rowCount = null;
 	private Integer rowSkip = null;
 	private String functionDescription = null;
+	private char filterPartSeparator = ';';
 	
 	/**
 	 * Create an instance if TableInput
@@ -111,14 +113,19 @@ public class TableInputImpl implements TableInput {
 		}
 		JCoParameterList tableParameterList = function.getTableParameterList();
 		// add where condition
-		if (filter != null && filter.trim().isEmpty() == false) {
+		List<String> filterPartList = TextSplitter.split(filter, filterPartSeparator);
+		if (filterPartList.size() > 0) {
 			JCoTable tableInputOptions = tableParameterList.getTable("OPTIONS");
-			tableInputOptions.appendRows(1);
+			tableInputOptions.appendRows(filterPartList.size());
 			tableInputOptions.firstRow();
-			tableInputOptions.setValue("TEXT", filter);
-			tableInputOptions.nextRow();
+			for (String part : filterPartList) {
+				if (part.length() > 72) {
+					throw new Exception("The filter expression: <" + filter + "> contains a part which is larger than 72 chars. Affected part: <"+ part + ">. Please split the filter with: <" + filterPartSeparator + "> into parts smaller than 72 chars");
+				}
+				tableInputOptions.setValue("TEXT", part);
+				tableInputOptions.nextRow();
+			}
 		}
-
 		// add fields
 		if (listFields.isEmpty()) {
 			throw new Exception("List of expected fields cannot not be empty");
@@ -240,7 +247,9 @@ public class TableInputImpl implements TableInput {
 
 	@Override
 	public void setFilter(String whereCondition) {
-		this.filter = whereCondition;
+		if (whereCondition != null) {
+			this.filter = whereCondition.trim();
+		}
 	}
 
 	@Override
