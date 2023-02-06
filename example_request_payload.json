@@ -1,0 +1,16 @@
+{
+	"destination": {
+		"type":"message_server",
+		"mshost":"ip",
+		"user":"username",
+		"password":"sevret",
+		"client":"003",
+		"r3name":"KE4",
+		"group":"Public"		
+	}
+	"tableName":"DD02L",
+	"fields":"TABNAME,FIELDNAME",
+	"filter":"TABNAME is not null",
+	"offset": 0,
+	"limit": 100
+}
