@@ -23,7 +23,7 @@ public class Service {
 		server.setHandler(context);
 		// Add SAP RFC servlet
 		SAPRFCTableInputServlet tableInputServlet = new SAPRFCTableInputServlet();
-		tableInputServlet.init();
+		tableInputServlet.setup();
 		context.addServlet(new ServletHolder(tableInputServlet), "/tableinput");
 		server.setStopAtShutdown(true);
 		// Start the webserver.

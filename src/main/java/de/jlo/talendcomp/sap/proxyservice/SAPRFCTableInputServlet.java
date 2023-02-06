@@ -151,8 +151,7 @@ public class SAPRFCTableInputServlet extends DefaultServlet {
 		doPost(req, resp);
 	}
 
-	@Override
-	public void init() throws UnavailableException {
+	public void setup() throws UnavailableException {
 		if (driver == null) {
 			try {
 				driver = DriverManager.getDriver();
