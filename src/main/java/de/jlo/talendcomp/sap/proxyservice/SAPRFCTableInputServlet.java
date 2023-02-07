@@ -81,7 +81,7 @@ public class SAPRFCTableInputServlet extends DefaultServlet {
 			}
 			Destination destination = null;
 			try {
-				destination = driver.createDestination(connProps);
+				destination = driver.getDestination(connProps);
 			} catch (Exception e) {
 				resp.sendError(400, "Could not setup destination. Error message: " + e.getMessage());
 				return;

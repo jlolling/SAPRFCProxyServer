@@ -120,12 +120,12 @@ public class TableInputImpl implements TableInput {
 			tableInputOptions.firstRow();
 			for (String part : filterPartList) {
 				if (part.length() > 72) {
-					throw new Exception("The filter expression: <" + filter + "> contains a part which is larger than 72 chars. Affected part: <"+ part + ">. Please split the filter with: <" + filterPartSeparator + "> into parts smaller than 72 chars");
+					throw new Exception("The filter expression: <" + filter + "> contains a part with a length of " + part.length() + " which is larger than 72 chars.\nAffected part is: <"+ part + ">.\nPlease split the filter with the delimiter: <" + filterPartSeparator + "> into parts smaller than 72 chars");
 				}
 				tableInputOptions.setValue("TEXT", part);
 				tableInputOptions.nextRow();
 			}
-		}
+		} 
 		// add fields
 		if (listFields.isEmpty()) {
 			throw new Exception("List of expected fields cannot not be empty");

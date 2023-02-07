@@ -11,8 +11,8 @@ public class DriverImpl implements Driver {
 	private static boolean providerRegistered = false;
 
 	@Override
-	public Destination createDestination(ConnectionProperties connProp) throws Exception {
-		DestinationImpl d = new DestinationImpl(createJCoDestination(connProp));
+	public Destination getDestination(ConnectionProperties connProp) throws Exception {
+		DestinationImpl d = new DestinationImpl(getJCoDestination(connProp));
 		return d;
 	}
 
@@ -21,7 +21,7 @@ public class DriverImpl implements Driver {
 	 * @return destination (means actually a kind of connection to SAP server)
 	 * @throws Exception
 	 */
-	private com.sap.conn.jco.JCoDestination createJCoDestination(ConnectionProperties connProp) throws Exception {
+	private com.sap.conn.jco.JCoDestination getJCoDestination(ConnectionProperties connProp) throws Exception {
 		if (connProp == null) {
 			throw new IllegalStateException("Connection properties are not created before");
 		}
