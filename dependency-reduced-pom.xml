@@ -16,6 +16,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
+        <version>3.4.1</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -27,10 +28,27 @@
                 <transformer>
                   <manifestEntries>
                     <Main-Class>de.jlo.talendcomp.sap.proxyservice.Service</Main-Class>
-                    <Class-Path>sapjco3.jar ${project.artifactId}-${project.version}.jar</Class-Path>
+                    <Class-Path>sapjco3.jar</Class-Path>
                   </manifestEntries>
                 </transformer>
               </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <copy />
+              </target>
             </configuration>
           </execution>
         </executions>

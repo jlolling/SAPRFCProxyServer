@@ -22,6 +22,7 @@ import de.jlo.talendcomp.sap.Driver;
 import de.jlo.talendcomp.sap.DriverManager;
 import de.jlo.talendcomp.sap.MessageServerProperties;
 import de.jlo.talendcomp.sap.TableInput;
+import de.jlo.talendcomp.sap.TalendContextPasswordUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,13 +58,19 @@ public class SAPRFCTableInputServlet extends DefaultServlet {
 			ObjectNode root = (ObjectNode) objectMapper.readTree(payload);
 			ObjectNode destNode = (ObjectNode) root.get("destination");
 			String type = destNode.get("destinationType").asText();
+			String password = destNode.get("password").textValue();
+			if (password == null || password.trim().isEmpty()) {
+				resp.sendError(400, "Password not set");
+				return;
+			}
+			password = TalendContextPasswordUtil.decryptPassword(password);
 			ConnectionProperties connProps = null;
 			if ("message_server".equals(type)) {
 				connProps = new MessageServerProperties()
 						.setHost(destNode.get("host").textValue())
 						.setClient(destNode.get("client").textValue())
 						.setUser(destNode.get("user").textValue())
-						.setPassword(destNode.get("password").textValue())
+						.setPassword(password)
 						.setLanguage(destNode.get("language").textValue())
 						.setGroup(destNode.get("group").textValue())
 						.setR3Name(destNode.get("r3name").textValue());
@@ -72,7 +79,7 @@ public class SAPRFCTableInputServlet extends DefaultServlet {
 						.setHost(destNode.get("host").textValue())
 						.setClient(destNode.get("client").textValue())
 						.setUser(destNode.get("user").textValue())
-						.setPassword(destNode.get("password").textValue())
+						.setPassword(password)
 						.setLanguage(destNode.get("language").textValue())
 						.setSystemNumber(destNode.get("systemNumber").textValue());
 			} else {
@@ -143,6 +150,7 @@ public class SAPRFCTableInputServlet extends DefaultServlet {
 			} catch (Exception e) {
 				resp.sendError(500, "Processing SAP RFC response failed: " + e.getMessage());
 			}
+			tableInput = null;
 		}
 	}
 	

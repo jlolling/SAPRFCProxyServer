@@ -36,7 +36,7 @@ import de.jlo.talendcomp.sap.TextSplitter;
  */
 public class TableInputImpl implements TableInput {
 
-	private JCoDestination connection = null;
+	private JCoDestination destination = null;
 	private String filter = null;
 	private String tableName = null;
 	private String tableResultFieldDelimiter = "\b"; // according to the String.split method this is faster!
@@ -59,7 +59,7 @@ public class TableInputImpl implements TableInput {
 		if (destination == null) {
 			throw new IllegalArgumentException("SAP destination cannot be null");
 		}
-		this.connection = destination;
+		this.destination = destination;
 	}
 	
 	/**
@@ -85,13 +85,13 @@ public class TableInputImpl implements TableInput {
 	 */
 	@Override
 	public void execute() throws Exception {
-		if (connection == null) {
-			throw new IllegalStateException("No SAP connection set!");
+		if (destination == null) {
+			throw new IllegalStateException("No SAP destination set!");
 		}
-		JCoRepository repository = connection.getRepository();
+		JCoRepository repository = destination.getRepository();
 		JCoFunctionTemplate functionTemplate_tSAPInput_1 = repository.getFunctionTemplate("RFC_READ_TABLE");
 		if (functionTemplate_tSAPInput_1 == null) {
-			com.sap.conn.jco.JCoContext.end(connection);
+			com.sap.conn.jco.JCoContext.end(destination);
 			throw new Exception("Function RFC_READ_TABLE does not exist or cannot be reached");
 		}
 		JCoFunction function = functionTemplate_tSAPInput_1.getFunction();
@@ -139,14 +139,15 @@ public class TableInputImpl implements TableInput {
 		}
 		// execute the query
 		try {
-			JCoContext.begin(connection);
-			functionDescription = getFunctionDescription(function);
-			function.execute(connection);
-			JCoContext.end(connection);
+			JCoContext.begin(destination);
+			function.execute(destination);
 		} catch (java.lang.Exception e) {
-			JCoContext.end(connection);
 			throw new Exception("Execute query failed: " + e.getMessage() + " using function:\n" + getFunctionDescription(function), e);
+		} finally {
+			JCoContext.end(destination);
 		}
+		// some meta information are only available after running the function
+		functionDescription = getFunctionDescription(function);
 		resultTable = tableParameterList.getTable("DATA");
 		if (resultTable == null) {
 			throw new Exception("Exceute query returned no DATA table");
