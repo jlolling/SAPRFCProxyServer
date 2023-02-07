@@ -101,16 +101,6 @@ public class SAPRFCTableInputServlet extends DefaultServlet {
 				resp.sendError(400, "Invalid destinationType: " + type);
 				return;
 			}
-			try {
-				connProps.build();
-			} catch (Exception e1) {
-				System.err.println("Parameters invalid. Error message: " + e1.getMessage());
-				resp.sendError(400, "Parameters invalid. Error message: " + e1.getMessage());
-				return;
-			}
-			if (logStatements) {
-				System.out.println("Parameters: \n" + connProps.getProperties().toString());
-			}
 			Destination destination = null;
 			try {
 				destination = driver.getDestination(connProps);
