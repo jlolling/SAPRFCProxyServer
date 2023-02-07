@@ -18,6 +18,8 @@ public interface TableInput {
 	
 	public void setRowsToSkip(Integer rowsToSkip);
 	
+	public void prepare() throws Exception;
+
 	public void execute() throws Exception;
 	
 	public boolean next() throws Exception;

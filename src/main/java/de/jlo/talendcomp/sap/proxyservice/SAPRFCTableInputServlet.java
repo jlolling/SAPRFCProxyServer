@@ -2,9 +2,9 @@ package de.jlo.talendcomp.sap.proxyservice;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -23,6 +23,7 @@ import de.jlo.talendcomp.sap.DriverManager;
 import de.jlo.talendcomp.sap.MessageServerProperties;
 import de.jlo.talendcomp.sap.TableInput;
 import de.jlo.talendcomp.sap.TalendContextPasswordUtil;
+import de.jlo.talendcomp.sap.TextSplitter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,6 +39,15 @@ public class SAPRFCTableInputServlet extends DefaultServlet {
 	private static final long serialVersionUID = 1L;
 	private Driver driver = null;
 	private final static ObjectMapper objectMapper = new ObjectMapper();
+	private boolean logStatements = false;
+
+	public boolean isLogStatements() {
+		return logStatements;
+	}
+
+	public void setLogStatements(boolean logStatements) {
+		this.logStatements = logStatements;
+	}
 
 	/**
 	 * Request
@@ -51,7 +61,11 @@ public class SAPRFCTableInputServlet extends DefaultServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		Reader r = req.getReader();
 		String payload = IOUtils.toString(r);
+		if (logStatements) {
+			System.out.println(payload);
+		}
 		if (payload == null || payload.trim().isEmpty()) {
+			System.err.println("No payload received");
 			resp.sendError(400, "No payload received");
 			return;
 		} else {
@@ -83,50 +97,80 @@ public class SAPRFCTableInputServlet extends DefaultServlet {
 						.setLanguage(destNode.get("language").textValue())
 						.setSystemNumber(destNode.get("systemNumber").textValue());
 			} else {
+				System.err.println("Invalid destinationType: " + type);
 				resp.sendError(400, "Invalid destinationType: " + type);
 				return;
+			}
+			try {
+				connProps.build();
+			} catch (Exception e1) {
+				System.err.println("Parameters invalid. Error message: " + e1.getMessage());
+				resp.sendError(400, "Parameters invalid. Error message: " + e1.getMessage());
+				return;
+			}
+			if (logStatements) {
+				System.out.println("Parameters: \n" + connProps.getProperties().toString());
 			}
 			Destination destination = null;
 			try {
 				destination = driver.getDestination(connProps);
 			} catch (Exception e) {
+				System.err.println("Could not setup destination. Error message: " + e.getMessage());
 				resp.sendError(400, "Could not setup destination. Error message: " + e.getMessage());
 				return;
 			}
 			String tableName = root.get("tableName").asText();
 			if (tableName == null || tableName.trim().isEmpty()) {
+				System.err.println("Parameter tableName is not set");
 				resp.sendError(400, "Parameter tableName is not set");
 				return;
 			}
 			JsonNode fields = root.get("fields");
-			if (fields.isMissingNode()) {
+			if (fields == null || fields.isMissingNode()) {
+				System.err.println("Fields not set");
 				resp.sendError(400, "Fields not set");
 				return;
 			}
-			if (fields.isArray() == false) {
-				resp.sendError(400, "Fields must provided as array");
-				return;
+			List<String> fieldList = null;
+			if (fields.isArray()) {
+				ArrayNode fieldArrayNode = (ArrayNode) fields;
+				fieldList = new ArrayList<>();
+				for (JsonNode fn : fieldArrayNode) {
+					fieldList.add(fn.textValue());
+				}
+			} else {
+				fieldList = TextSplitter.split(fields.textValue(), ',');
 			}
-			ArrayNode fieldArrayNode = (ArrayNode) fields;
 			String filter = root.get("filter").textValue();
-			Integer offset = root.get("offset").intValue();
-			Integer limit = root.get("limit").intValue();
+			int offset = root.get("offset").intValue();
+			int limit = root.get("limit").intValue();
 			TableInput tableInput = destination.createTableInput();
 			tableInput.setTableName(tableName);
-			for (JsonNode fn : fieldArrayNode) {
-				tableInput.addField(fn.textValue());
+			for (String f : fieldList) {
+				tableInput.addField(f);
 			}
 			tableInput.setFilter(filter);
+			try {
+				tableInput.prepare();
+			} catch (Exception e) {
+				System.err.println("Prepare function failed: " + e.getMessage());
+				resp.sendError(500, "Prepare function failed: " + e.getMessage());
+				return;
+			}
 			tableInput.setRowsToSkip(offset);
 			tableInput.setMaxRows(limit);
 			try {
 				tableInput.execute();
 			} catch (Exception e) {
-				resp.sendError(500, "Execute query failed: " + e.getMessage());
+				System.err.println("Execute function failed: " + e.getMessage());
+				resp.sendError(500, "Execute function failed: " + e.getMessage());
 				return;
 			}
-			final OutputStream out = resp.getOutputStream();
-			try (BufferedWriter br = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"))) {
+			if (logStatements) {
+				System.out.println(tableInput.getFunctionDescription());
+			}
+			final Writer out = resp.getWriter();
+			try (BufferedWriter br = new BufferedWriter(out)) {
 				resp.setContentType("application/json");
 				resp.setStatus(200);
 				br.write("[\n");
@@ -148,6 +192,7 @@ public class SAPRFCTableInputServlet extends DefaultServlet {
 				br.write("\n]");
 				br.flush();
 			} catch (Exception e) {
+				System.err.println("Processing SAP RFC response failed: " + e.getMessage());
 				resp.sendError(500, "Processing SAP RFC response failed: " + e.getMessage());
 			}
 			tableInput = null;

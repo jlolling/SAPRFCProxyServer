@@ -13,7 +13,7 @@ public class Service {
 	
 	private Server server = null;
 
-	public void start(int port) throws Exception {
+	public void start(int port, boolean log) throws Exception {
 		if (port < 1) {
 			throw new IllegalArgumentException("Port must be greater 0");
 		}
@@ -24,6 +24,10 @@ public class Service {
 		// Add SAP RFC servlet
 		SAPRFCTableInputServlet tableInputServlet = new SAPRFCTableInputServlet();
 		tableInputServlet.setup();
+		tableInputServlet.setLogStatements(log);
+		if (log) {
+			System.out.println("Add servlet: SAPRFCTableInputServlet at path: /tableinput");
+		}
 		context.addServlet(new ServletHolder(tableInputServlet), "/tableinput");
 		server.setStopAtShutdown(true);
 		// Start the webserver.
@@ -42,10 +46,19 @@ public class Service {
 
 	public static void main(String[] args) throws Exception {
     	Options options = new Options();
-    	options.addOption("p", "port", true, "PORT");
+    	options.addOption("p", "port", true, "Port of the server");
+    	options.addOption("v", "verbose", false, "Print statements to console");
+    	options.addOption("h", "help", false, "Print help to console, do nothing else.");
     	CommandLineParser parser = new DefaultParser();
     	CommandLine cmd = parser.parse( options, args);
     	String portStr = cmd.getOptionValue('p', "9999");
+    	boolean verbose = cmd.hasOption('v');
+    	boolean help = cmd.hasOption('h');
+    	if (help) {
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("java -jar saprfcproxy-<version>.jar", options);
+			System.exit(0);
+    	}
     	int port = 0;
     	try {
     		port = Integer.valueOf(portStr);
@@ -56,7 +69,7 @@ public class Service {
     	}
     	Service service = new Service();
     	System.out.println("Start SAP RFC Proxy Server at port: " + port);
-    	service.start(port);
+    	service.start(port, verbose);
 	}
 
 }

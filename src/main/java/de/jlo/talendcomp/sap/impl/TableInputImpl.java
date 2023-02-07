@@ -42,6 +42,7 @@ public class TableInputImpl implements TableInput {
 	private String tableResultFieldDelimiter = "\b"; // according to the String.split method this is faster!
 	private List<String> listFields = new ArrayList<>();
 	private com.sap.conn.jco.JCoTable resultTable = null;
+	private JCoFunction function = null;
 	private List<String> currentRow = null;
 	private String currentRawData = null;
 	private int totalRowCount = 0;
@@ -79,12 +80,8 @@ public class TableInputImpl implements TableInput {
 		}
 	}
 	
-	/**
-	 * execute the query
-	 * @throws Exception
-	 */
 	@Override
-	public void execute() throws Exception {
+	public void prepare() throws Exception {
 		if (destination == null) {
 			throw new IllegalStateException("No SAP destination set!");
 		}
@@ -94,23 +91,7 @@ public class TableInputImpl implements TableInput {
 			com.sap.conn.jco.JCoContext.end(destination);
 			throw new Exception("Function RFC_READ_TABLE does not exist or cannot be reached");
 		}
-		JCoFunction function = functionTemplate_tSAPInput_1.getFunction();
-
-		JCoParameterList importParameterList = function.getImportParameterList();
-		
-		// add parameter for source table
-		if (tableName == null || tableName.trim().isEmpty()) {
-			throw new Exception("Source table name cannot be null or empty!");
-		}
-		importParameterList.setValue("QUERY_TABLE", tableName);
-		// delimiter to later separate the result fields
-		importParameterList.setValue("DELIMITER", tableResultFieldDelimiter);
-		if (rowCount != null && rowCount > 0) {
-			importParameterList.setValue("ROWCOUNT", String.valueOf(rowCount));
-		}
-		if (rowSkip != null && rowSkip > 0) {
-			importParameterList.setValue("ROWSKIPS", String.valueOf(rowSkip));
-		}
+		function = functionTemplate_tSAPInput_1.getFunction();
 		JCoParameterList tableParameterList = function.getTableParameterList();
 		// add where condition
 		List<String> filterPartList = TextSplitter.split(filter, filterPartSeparator);
@@ -137,6 +118,32 @@ public class TableInputImpl implements TableInput {
 			tableInputFields.setValue("FIELDNAME", fieldName);
 			tableInputFields.nextRow();
 		}
+	}
+	
+	/**
+	 * execute the query
+	 * @throws Exception
+	 */
+	@Override
+	public void execute() throws Exception {
+		if (function == null) {
+			throw new IllegalStateException("Function not prepared. Please call prepare() before.");
+		}
+		JCoParameterList importParameterList = function.getImportParameterList();
+		// add parameter for source table
+		if (tableName == null || tableName.trim().isEmpty()) {
+			throw new Exception("Source table name cannot be null or empty!");
+		}
+		importParameterList.setValue("QUERY_TABLE", tableName);
+		// delimiter to later separate the result fields
+		importParameterList.setValue("DELIMITER", tableResultFieldDelimiter);
+		// setup offset and limit
+		if (rowCount != null && rowCount > 0) {
+			importParameterList.setValue("ROWCOUNT", String.valueOf(rowCount));
+		}
+		if (rowSkip != null && rowSkip > 0) {
+			importParameterList.setValue("ROWSKIPS", String.valueOf(rowSkip));
+		}
 		// execute the query
 		try {
 			JCoContext.begin(destination);
@@ -148,7 +155,7 @@ public class TableInputImpl implements TableInput {
 		}
 		// some meta information are only available after running the function
 		functionDescription = getFunctionDescription(function);
-		resultTable = tableParameterList.getTable("DATA");
+		resultTable = function.getTableParameterList().getTable("DATA");
 		if (resultTable == null) {
 			throw new Exception("Exceute query returned no DATA table");
 		}
