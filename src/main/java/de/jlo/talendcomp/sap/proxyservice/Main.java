@@ -9,11 +9,14 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-public class Service {
+public class Main {
 	
-	private Server server = null;
+	private static Server server = null;
+	private static int port = 9999;
+	private static boolean verbose = false;
+	private static String propertiesFileDir = null;
 
-	public void start(int port, boolean log) throws Exception {
+	public static void start() throws Exception {
 		if (port < 1) {
 			throw new IllegalArgumentException("Port must be greater 0");
 		}
@@ -23,9 +26,10 @@ public class Service {
 		server.setHandler(context);
 		// Add SAP RFC servlet
 		SAPRFCTableInputServlet tableInputServlet = new SAPRFCTableInputServlet();
+		tableInputServlet.setPropertyFileDir(propertiesFileDir);
 		tableInputServlet.setup();
-		tableInputServlet.setLogStatements(log);
-		if (log) {
+		tableInputServlet.setLogStatements(verbose);
+		if (verbose) {
 			System.out.println("Add servlet: SAPRFCTableInputServlet at path: /tableinput");
 		}
 		context.addServlet(new ServletHolder(tableInputServlet), "/tableinput");
@@ -34,7 +38,7 @@ public class Service {
 		server.start();
 	}
 	
-	public void stop() {
+	public static void stop() {
 		if (server != null) {
 			try {
 				server.stop();
@@ -49,17 +53,17 @@ public class Service {
     	options.addOption("p", "port", true, "Port of the server");
     	options.addOption("v", "verbose", false, "Print statements to console");
     	options.addOption("h", "help", false, "Print help to console, do nothing else.");
+    	options.addOption("d", "dest-prop-dir", true, "Dir for destination properties files");
     	CommandLineParser parser = new DefaultParser();
     	CommandLine cmd = parser.parse( options, args);
     	String portStr = cmd.getOptionValue('p', "9999");
-    	boolean verbose = cmd.hasOption('v');
+    	verbose = cmd.hasOption('v');
     	boolean help = cmd.hasOption('h');
     	if (help) {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("java -jar saprfcproxy-<version>.jar", options);
 			System.exit(0);
     	}
-    	int port = 0;
     	try {
     		port = Integer.valueOf(portStr);
     	} catch (Exception e) {
@@ -67,9 +71,9 @@ public class Service {
 			formatter.printHelp("java -jar saprfcproxy-<version>.jar", options);
 			System.exit(4);
     	}
-    	Service service = new Service();
+    	propertiesFileDir = cmd.getOptionValue('d');
     	System.out.println("Start SAP RFC Proxy Server at port: " + port);
-    	service.start(port, verbose);
+    	start();
 	}
 
 }
