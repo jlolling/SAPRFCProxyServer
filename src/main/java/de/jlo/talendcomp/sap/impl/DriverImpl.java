@@ -23,7 +23,7 @@ public class DriverImpl implements Driver {
 	 */
 	private com.sap.conn.jco.JCoDestination getJCoDestination(ConnectionProperties connProp) throws Exception {
 		if (connProp == null) {
-			throw new IllegalStateException("Connection properties are not created before");
+			throw new IllegalStateException("Connection properties are null and not created before");
 		}
 		connProp.build();
 		if (providerRegistered == false) {

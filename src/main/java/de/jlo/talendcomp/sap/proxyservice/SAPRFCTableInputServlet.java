@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
 
 import de.jlo.talendcomp.sap.ApplicationServerProperties;
 import de.jlo.talendcomp.sap.ConnectionProperties;
@@ -56,11 +57,23 @@ public class SAPRFCTableInputServlet extends DefaultServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		doPost(req, resp);
 	}
-
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		Reader r = req.getReader();
-		String payload = IOUtils.toString(r);
+	
+	private String getStringValue(ObjectNode node, String attribute) {
+		if (node == null) {
+			throw new IllegalArgumentException("Node name cannot be null");
+		}
+		if (attribute == null || attribute.trim().isEmpty()) {
+			throw new IllegalArgumentException("attribute name cannot be null or empty");
+		}
+		JsonNode n = node.get(attribute);
+		if (n != null) {
+			return n.textValue();
+		} else {
+			return null;
+		}
+	}
+	
+	private void performQuery(String payload, HttpServletResponse resp) throws ServletException, IOException {
 		if (logStatements) {
 			System.out.println(payload);
 		}
@@ -71,31 +84,39 @@ public class SAPRFCTableInputServlet extends DefaultServlet {
 		} else {
 			ObjectNode root = (ObjectNode) objectMapper.readTree(payload);
 			ObjectNode destNode = (ObjectNode) root.get("destination");
-			String type = destNode.get("destinationType").asText();
-			String password = destNode.get("password").textValue();
+			String destinationName = getStringValue(destNode, "destinationName");
+			String type = getStringValue(destNode, "destinationType");
+			String password = getStringValue(destNode, "password");
 			if (password == null || password.trim().isEmpty()) {
 				resp.sendError(400, "Password not set");
 				return;
 			}
 			password = TalendContextPasswordUtil.decryptPassword(password);
+			String host = getStringValue(destNode, "host");
+			String client = getStringValue(destNode, "client");
+			String user = getStringValue(destNode, "user");
+			String language = getStringValue(destNode, "language");
+			String group = getStringValue(destNode, "group");
+			String r3Name = getStringValue(destNode, "r3name");
+			String systemNumber = getStringValue(destNode, "systemNumber");
 			ConnectionProperties connProps = null;
 			if ("message_server".equals(type)) {
 				connProps = new MessageServerProperties()
-						.setHost(destNode.get("host").textValue())
-						.setClient(destNode.get("client").textValue())
-						.setUser(destNode.get("user").textValue())
+						.setHost(host)
+						.setClient(client)
+						.setUser(user)
 						.setPassword(password)
-						.setLanguage(destNode.get("language").textValue())
-						.setGroup(destNode.get("group").textValue())
-						.setR3Name(destNode.get("r3name").textValue());
+						.setLanguage(language)
+						.setGroup(group)
+						.setR3Name(r3Name);
 			} else if ("application_server".equals(type)) {
 				connProps = new ApplicationServerProperties()
-						.setHost(destNode.get("host").textValue())
-						.setClient(destNode.get("client").textValue())
-						.setUser(destNode.get("user").textValue())
+						.setHost(host)
+						.setClient(client)
+						.setUser(user)
 						.setPassword(password)
-						.setLanguage(destNode.get("language").textValue())
-						.setSystemNumber(destNode.get("systemNumber").textValue());
+						.setLanguage(language)
+						.setSystemNumber(systemNumber);
 			} else {
 				System.err.println("Invalid destinationType: " + type);
 				resp.sendError(400, "Invalid destinationType: " + type);
@@ -186,6 +207,69 @@ public class SAPRFCTableInputServlet extends DefaultServlet {
 				resp.sendError(500, "Processing SAP RFC response failed: " + e.getMessage());
 			}
 			tableInput = null;
+		}		
+	}
+	
+	private List<String> createTestRow(int currentRowIndex, int countColumns) {
+		List<String> row = new ArrayList<>();
+		for (int i = 0; i < countColumns; i++) {
+			String v = "V" + currentRowIndex + "-" + i;
+			row.add(v);
+		}
+		return row;
+	}
+	
+	private void performTestoutput(int numTestRecords, int numTestColumns, HttpServletResponse resp) throws ServletException, IOException {
+		final Writer out = resp.getWriter();
+		try (BufferedWriter br = new BufferedWriter(out)) {
+			resp.setContentType("application/json");
+			resp.setStatus(200);
+			br.write("[\n");
+			boolean firstLoop = true;
+			for (int i = 0; i < numTestRecords; i++) {
+				ArrayNode outrow = objectMapper.createArrayNode();
+				List<String> inrow = createTestRow(i, numTestColumns);
+				for (String v : inrow) {
+					outrow.add(v);
+				}
+				if (firstLoop) {
+					firstLoop = false;
+				} else {
+					br.write(",\n");
+				}
+				br.write(objectMapper.writeValueAsString(outrow));
+				br.flush();
+			}
+			br.write("\n]");
+			br.flush();
+		} catch (Exception e) {
+			System.err.println("Processing SAP RFC response failed: " + e.getMessage());
+			resp.sendError(500, "Processing SAP RFC response failed: " + e.getMessage());
+		}
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String testrowsStr = req.getParameter("testrows");
+		if (testrowsStr == null || testrowsStr.trim().isEmpty()) {
+			Reader r = req.getReader();
+			String payload = IOUtils.toString(r);
+			performQuery(payload, resp);
+		} else {
+			int testRows = 1000;
+			try {
+				testRows = Integer.parseInt(testrowsStr);
+			} catch (NumberFormatException nfe) {
+				System.err.println("Parameter value for testrows is not a number: " + testrowsStr + ". Service use default value: " + testRows);
+			}
+			String testcolStr = req.getParameter("testcols");
+			int testCols = 10;
+			try {
+				testCols = Integer.parseInt(testcolStr);
+			} catch (NumberFormatException nfe) {
+				System.err.println("Parameter value for testcols is not a number: " + testcolStr + ". Service use default value: " + testCols);
+			}
+			performTestoutput(testRows, testCols, resp);
 		}
 	}
 	
