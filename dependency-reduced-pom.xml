@@ -27,7 +27,7 @@
               <transformers>
                 <transformer>
                   <manifestEntries>
-                    <Main-Class>de.jlo.talendcomp.sap.proxyservice.Service</Main-Class>
+                    <Main-Class>de.jlo.talendcomp.sap.proxyservice.Main</Main-Class>
                     <Class-Path>sapjco3.jar</Class-Path>
                   </manifestEntries>
                 </transformer>

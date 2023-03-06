@@ -1,10 +1,13 @@
 package de.jlo.talendcomp.sap.proxyservice;
 
+import java.lang.management.ManagementFactory;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -21,6 +24,9 @@ public class Main {
 			throw new IllegalArgumentException("Port must be greater 0");
 		}
 		server = new Server(port);
+		MBeanContainer mbContainer = new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
+		server.addEventListener(mbContainer);
+		server.addBean(mbContainer);
 		ServletContextHandler context = new ServletContextHandler();
 		context.setContextPath("/");
 		server.setHandler(context);
@@ -33,6 +39,14 @@ public class Main {
 			System.out.println("Add servlet: SAPRFCTableInputServlet at path: /tableinput");
 		}
 		context.addServlet(new ServletHolder(tableInputServlet), "/tableinput");
+		SAPRFCPingServlet pingServlet = new SAPRFCPingServlet();
+		tableInputServlet.setPropertyFileDir(propertiesFileDir);
+		pingServlet.setup();
+		pingServlet.setLogStatements(verbose);
+		context.addServlet(new ServletHolder(pingServlet), "/ping");
+		if (verbose) {
+			System.out.println("Add servlet: SAPRFCPingServlet at path: /ping");
+		}
 		server.setStopAtShutdown(true);
 		// Start the webserver.
 		server.start();
