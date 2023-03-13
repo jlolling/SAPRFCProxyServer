@@ -105,6 +105,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			if (logStatements) {
 				System.out.println(tableInput.getFunctionDescription());
 			}
+			resp.setHeader("total-rows", String.valueOf(tableInput.getTotalRowCount()));
 			final Writer out = resp.getWriter();
 			try (BufferedWriter br = new BufferedWriter(out)) {
 				resp.setContentType("application/json");
