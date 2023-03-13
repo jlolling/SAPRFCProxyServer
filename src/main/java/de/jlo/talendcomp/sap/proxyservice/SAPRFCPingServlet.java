@@ -31,6 +31,7 @@ public class SAPRFCPingServlet extends SAPRFCServlet {
 		try {
 			Destination destination = createDestination(payload);
 			if (destination != null) {
+				destination.ping();
 				resp.setStatus(202); // send ok back
 				return;
 			}

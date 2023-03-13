@@ -1,4 +1,4 @@
-package de.jlo.talendcomp.sap.impl;
+package de.jlo.talendcomp.sap.sapjco;
 
 import java.util.HashMap;
 import java.util.Map;

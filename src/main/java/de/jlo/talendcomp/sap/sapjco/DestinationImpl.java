@@ -1,4 +1,4 @@
-package de.jlo.talendcomp.sap.impl;
+package de.jlo.talendcomp.sap.sapjco;
 
 import com.sap.conn.jco.JCoDestination;
 
@@ -29,6 +29,15 @@ public class DestinationImpl implements Destination {
 			throw new IllegalArgumentException("jcoDestination cannot be null");
 		}
 		this.jcoDestination = jcoDestination;
+	}
+	
+	@Override
+	public void ping() throws Exception {
+		try {
+			this.jcoDestination.ping();
+		} catch (Exception e) {
+			throw new Exception("Connection check (ping) failed: " + e.getMessage(), e);
+		}
 	}
 	
 	@Override
