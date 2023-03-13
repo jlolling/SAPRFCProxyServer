@@ -274,7 +274,6 @@ public class TableInputImpl implements TableInput {
 		return tableResultFieldDelimiter;
 	}
 
-	@Override
 	public void setTableResultFieldDelimiter(String tableResultFieldDelimiter) {
 		this.tableResultFieldDelimiter = tableResultFieldDelimiter;
 	}

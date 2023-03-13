@@ -12,8 +12,6 @@ public interface TableInput {
 	
 	public void setFilter(String whereCondition);
 	
-	public void setTableResultFieldDelimiter(String delimiter);
-	
 	public void setMaxRows(Integer maxRows);
 	
 	public void setRowsToSkip(Integer rowsToSkip);
