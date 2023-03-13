@@ -113,17 +113,17 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 				br.write("[\n");
 				boolean firstLoop = true;
 				while (tableInput.next()) {
-					ArrayNode outrow = objectMapper.createArrayNode();
-					List<String> inrow = tableInput.getCurrentRow();
-					for (String v : inrow) {
-						outrow.add(v);
+					List<String> oneRow = tableInput.getCurrentRow();
+					ArrayNode oneRowArrayNode = objectMapper.createArrayNode();
+					for (String v : oneRow) {
+						oneRowArrayNode.add(v);
 					}
 					if (firstLoop) {
 						firstLoop = false;
 					} else {
 						br.write(",\n");
 					}
-					br.write(objectMapper.writeValueAsString(outrow));
+					br.write(objectMapper.writeValueAsString(oneRowArrayNode));
 					br.flush();
 				}
 				br.write("\n]");
