@@ -31,12 +31,12 @@ public class SAPRFCPingServlet extends SAPRFCServlet {
 		try {
 			Destination destination = createDestination(payload);
 			if (destination != null) {
+				destination.ping();
 				resp.setStatus(202); // send ok back
 				return;
 			}
 		} catch (Exception e) {
-			System.err.println("Could not setup destination. Error message: " + e.getMessage());
-			resp.sendError(400, "Could not setup destination. Error message: " + e.getMessage());
+			sendError(resp, 400, "Could not setup destination. Error message: " + e.getMessage());
 			return;
 		}
 	}

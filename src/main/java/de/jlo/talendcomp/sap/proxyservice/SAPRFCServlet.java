@@ -1,5 +1,8 @@
 package de.jlo.talendcomp.sap.proxyservice;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -19,6 +22,7 @@ import de.jlo.talendcomp.sap.DriverManager;
 import de.jlo.talendcomp.sap.MessageServerProperties;
 import de.jlo.talendcomp.sap.TalendContextPasswordUtil;
 import jakarta.servlet.UnavailableException;
+import jakarta.servlet.http.HttpServletResponse;
 
 public abstract class SAPRFCServlet extends DefaultServlet {
 
@@ -76,10 +80,9 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 
 	protected Destination createDestination(String payload) throws ServiceException {
 		if (logStatements) {
-			System.out.println(payload);
+			info(payload);
 		}
 		if (payload == null || payload.trim().isEmpty()) {
-			System.err.println("No payload received");
 			throw new ServiceException(400, "No payload received");
 		} else {
 			ObjectNode root;
@@ -104,7 +107,6 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 				// get the properties
 				Properties destinationProps = mapDestinationProperties.get(destinationName);
 				if (destinationProps == null || destinationProps.size() == 0) {
-					System.err.println("No payload received");
 					throw new ServiceException(400, "No destinationProperties for the name: " + destinationName + " available");
 				}
 				type = destinationProps.getProperty("destinationType");
@@ -155,7 +157,7 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 						.setLanguage(language)
 						.setSystemNumber(systemNumber);
 			} else {
-				System.err.println("Invalid destinationType: " + type);
+				warn("Invalid destinationType: " + type);
 				throw new ServiceException(400, "Invalid destinationType: " + type);
 			}
 			Destination destination = null;
@@ -167,6 +169,30 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 				throw new ServiceException(400, "Could not setup destination. Error message: " + e.getMessage(), e);
 			}
 		}		
+	}
+	
+	public void sendError(HttpServletResponse resp, int code, String message) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		System.err.print(sdf.format(new Date()) + " [ERROR] code: " + code);
+		System.err.println(" message: " + message);
+		try {
+			resp.sendError(code, message);
+		} catch (IOException e) {
+			System.err.println("sendError code: " + code + " message: " + message + " failed: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
+	public void info(String message) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		System.out.print(sdf.format(new Date()) + " [INFO] ");
+		System.out.println(message);
+	}
+
+	public void warn(String message) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		System.err.print(sdf.format(new Date()) + " [WARNING] ");
+		System.err.println(message);
 	}
 
 }

@@ -39,11 +39,10 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 	
 	private void performQuery(String payload, HttpServletResponse resp) throws ServletException, IOException {
 		if (logStatements) {
-			System.out.println(payload);
+			info(payload);
 		}
 		if (payload == null || payload.trim().isEmpty()) {
-			System.err.println("No payload received");
-			resp.sendError(400, "No payload received");
+			sendError(resp, 400, "No payload received");
 			return;
 		} else {
 			ObjectNode root = (ObjectNode) objectMapper.readTree(payload);
@@ -51,20 +50,17 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			try {
 				destination = createDestination(payload);
 			} catch (ServiceException e1) {
-				System.err.println(e1.getMessage());
-				resp.sendError(e1.getStatusCode(), e1.getMessage());
+				sendError(resp, e1.getStatusCode(), e1.getMessage());
 				return;
 			}
 			String tableName = root.get("tableName").asText();
 			if (tableName == null || tableName.trim().isEmpty()) {
-				System.err.println("Parameter tableName is not set");
-				resp.sendError(400, "Parameter tableName is not set");
+				sendError(resp, 400, "Parameter tableName is not set");
 				return;
 			}
 			JsonNode fields = root.get("fields");
 			if (fields == null || fields.isMissingNode()) {
-				System.err.println("Fields not set");
-				resp.sendError(400, "Fields not set");
+				sendError(resp, 400, "Fields not set");
 				return;
 			}
 			List<String> fieldList = null;
@@ -89,8 +85,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			try {
 				tableInput.prepare();
 			} catch (Exception e) {
-				System.err.println("Prepare function failed: " + e.getMessage());
-				resp.sendError(500, "Prepare function failed: " + e.getMessage());
+				sendError(resp, 500, "Prepare function failed: " + e.getMessage());
 				return;
 			}
 			tableInput.setRowsToSkip(offset);
@@ -98,12 +93,11 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			try {
 				tableInput.execute();
 			} catch (Exception e) {
-				System.err.println("Execute function failed: " + e.getMessage());
-				resp.sendError(500, "Execute function failed: " + e.getMessage());
+				sendError(resp, 500, "Execute function failed: " + e.getMessage());
 				return;
 			}
 			if (logStatements) {
-				System.out.println(tableInput.getFunctionDescription());
+				info(tableInput.getFunctionDescription());
 			}
 			resp.setHeader("total-rows", String.valueOf(tableInput.getTotalRowCount()));
 			final Writer out = resp.getWriter();
@@ -129,8 +123,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 				br.write("\n]");
 				br.flush();
 			} catch (Exception e) {
-				System.err.println("Processing SAP RFC response failed: " + e.getMessage());
-				resp.sendError(500, "Processing SAP RFC response failed: " + e.getMessage());
+				sendError(resp, 500, "Processing SAP RFC response failed: " + e.getMessage());
 			}
 			tableInput = null;
 		}		
@@ -150,6 +143,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 		try (BufferedWriter br = new BufferedWriter(out)) {
 			resp.setContentType("application/json");
 			resp.setStatus(200);
+			resp.setHeader("total-rows", String.valueOf(numTestRecords));
 			br.write("[\n");
 			boolean firstLoop = true;
 			for (int i = 0; i < numTestRecords; i++) {
@@ -169,8 +163,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			br.write("\n]");
 			br.flush();
 		} catch (Exception e) {
-			System.err.println("Processing SAP RFC response failed: " + e.getMessage());
-			resp.sendError(500, "Processing SAP RFC response failed: " + e.getMessage());
+			sendError(resp, 500, "Processing SAP RFC response failed: " + e.getMessage());
 		}
 	}
 
@@ -186,14 +179,14 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			try {
 				testRows = Integer.parseInt(testrowsStr);
 			} catch (NumberFormatException nfe) {
-				System.err.println("Parameter value for testrows is not a number: " + testrowsStr + ". Service use default value: " + testRows);
+				warn("Parameter value for testrows is not a number: " + testrowsStr + ". Service use default value: " + testRows);
 			}
 			String testcolStr = req.getParameter("testcols");
 			int testCols = 10;
 			try {
 				testCols = Integer.parseInt(testcolStr);
 			} catch (NumberFormatException nfe) {
-				System.err.println("Parameter value for testcols is not a number: " + testcolStr + ". Service use default value: " + testCols);
+				warn("Parameter value for testcols is not a number: " + testcolStr + ". Service use default value: " + testCols);
 			}
 			performTestoutput(testRows, testCols, resp);
 		}
