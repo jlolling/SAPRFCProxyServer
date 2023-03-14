@@ -1,4 +1,4 @@
-package de.jlo.talendcomp.sap.impl;
+package de.jlo.talendcomp.sap.sapjco;
 
 import de.jlo.talendcomp.sap.ConnectionProperties;
 import de.jlo.talendcomp.sap.Destination;
@@ -33,7 +33,6 @@ public class DriverImpl implements Driver {
 		ProxyDestinationDataProvider.getInstance().setConnectionProperties(connProp);
 		// JCoDestinationManager will use the register MyDestinationDataProvider
 		com.sap.conn.jco.JCoDestination dest = com.sap.conn.jco.JCoDestinationManager.getDestination(connProp.getDestinationName());
-		dest.ping();
 		return dest;
 	}
 	

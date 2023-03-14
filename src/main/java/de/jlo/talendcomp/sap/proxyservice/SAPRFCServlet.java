@@ -36,7 +36,7 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 	public void setup() throws UnavailableException {
 		if (driver == null) {
 			try {
-				driver = DriverManager.getDriver();
+				driver = DriverManager.getDriverSAPJCO();
 			} catch (Exception e) {
 				throw new UnavailableException("Load driver failed: " + e.getMessage());
 			}

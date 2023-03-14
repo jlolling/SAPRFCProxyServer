@@ -1,4 +1,4 @@
-package de.jlo.talendcomp.sap.impl;
+package de.jlo.talendcomp.sap.sapjco;
 
 import com.sap.conn.jco.JCoDestination;
 

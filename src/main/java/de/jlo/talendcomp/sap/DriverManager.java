@@ -19,14 +19,14 @@ public class DriverManager {
 	 * @return driver instance - actually a instance of DriverImpl
 	 * @throws Exception
 	 */
-	public static Driver getDriver() throws Exception {
+	public static Driver getDriverSAPJCO() throws Exception {
 		try {
 			Class.forName("com.sap.conn.jco.JCoTable");
 		} catch (ClassNotFoundException e) {
 			throw new Exception("Classes from sapjco3.jar not available.", e);
 		}
 		// this is the part we separate the implementation from the interface
-		return (Driver) Class.forName("de.jlo.talendcomp.sap.impl.DriverImpl").getDeclaredConstructor().newInstance();
+		return (Driver) Class.forName("de.jlo.talendcomp.sap.sapjco.DriverImpl").getDeclaredConstructor().newInstance();
 	}
 	
 }
