@@ -73,9 +73,21 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			} else {
 				fieldList = TextSplitter.split(fields.textValue(), ',');
 			}
-			String filter = root.get("filter").textValue();
-			int offset = root.get("offset").intValue();
-			int limit = root.get("limit").intValue();
+			JsonNode filterNode = root.get("filter");
+			String filter = null;
+			if (filterNode != null) {
+				filter = filterNode.asText();
+			}
+			int offset = 0;
+			JsonNode offsetNode = root.get("offset");
+			if (offsetNode != null) {
+				offset = offsetNode.asInt(0);
+			}
+			int limit = 0;
+			JsonNode limitNode = root.get("limit");
+			if (limitNode != null ) {
+				limit = limitNode.asInt(0);
+			}
 			TableInput tableInput = destination.createTableInput();
 			tableInput.setTableName(tableName);
 			for (String f : fieldList) {

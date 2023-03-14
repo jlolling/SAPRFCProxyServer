@@ -173,7 +173,7 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 	
 	public void sendError(HttpServletResponse resp, int code, String message) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		System.err.print(sdf.format(new Date()) + " [ERROR] code: " + code);
+		System.err.print(sdf.format(new Date()) + " " + this.getClass().getSimpleName() + " [ERROR] code: " + code);
 		System.err.println(" message: " + message);
 		try {
 			resp.sendError(code, message);
@@ -185,13 +185,13 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 	
 	public void info(String message) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		System.out.print(sdf.format(new Date()) + " [INFO] ");
+		System.out.print(sdf.format(new Date()) + " " + this.getClass().getSimpleName() + " [INFO] ");
 		System.out.println(message);
 	}
 
 	public void warn(String message) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		System.err.print(sdf.format(new Date()) + " [WARNING] ");
+		System.err.print(sdf.format(new Date()) + " " + this.getClass().getSimpleName() + " [WARNING] ");
 		System.err.println(message);
 	}
 
