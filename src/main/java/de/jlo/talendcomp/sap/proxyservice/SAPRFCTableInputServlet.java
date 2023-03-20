@@ -109,6 +109,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 										statusSet = true;
 									}
 									out.write("executing\n");
+									out.flush();
 								} catch (Exception e) {
 									break;
 								}

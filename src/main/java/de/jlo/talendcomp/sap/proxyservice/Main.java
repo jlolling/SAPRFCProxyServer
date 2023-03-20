@@ -43,14 +43,15 @@ public class Main {
 		tableInputServlet.setPropertyFileDir(propertiesFileDir);
 		pingServlet.setup();
 		pingServlet.setLogStatements(verbose);
-		context.addServlet(new ServletHolder(pingServlet), "/ping");
+		context.addServlet(new ServletHolder(pingServlet), "/sap-ping");
 		if (verbose) {
-			System.out.println("Add servlet: SAPRFCPingServlet at path: /ping");
+			System.out.println("Add servlet: SAPRFCPingServlet at path: /sap-ping");
 		}
 		context.addServlet(new ServletHolder(new ShutdownServlet()), "/shutdown");
 		if (verbose) {
 			System.out.println("Add servlet: ShutdownServlet at path: /shutdown");
 		}
+		context.addServlet(new ServletHolder(new PingServlet()), "/ping");
 		server.setStopAtShutdown(true);
 		// Start the webserver.
 		server.start();
