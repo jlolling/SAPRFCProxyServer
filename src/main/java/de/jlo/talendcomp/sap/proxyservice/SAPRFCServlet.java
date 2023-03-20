@@ -63,7 +63,7 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 		this.logStatements = logStatements;
 	}
 
-	protected String getStringValue(ObjectNode node, String attribute) {
+	protected JsonNode getJsonNode(JsonNode node, String attribute) {
 		if (node == null) {
 			throw new IllegalArgumentException("Node name cannot be null");
 		}
@@ -71,8 +71,68 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 			throw new IllegalArgumentException("attribute name cannot be null or empty");
 		}
 		JsonNode n = node.get(attribute);
+		if (n != null && n.isNull() == false && n.isMissingNode() == false) {
+			return n;
+		} else {
+			return null;
+		}
+	}
+
+	protected String getStringValue(JsonNode node, String attribute) {
+		if (node == null) {
+			throw new IllegalArgumentException("Node name cannot be null");
+		}
+		if (attribute == null || attribute.trim().isEmpty()) {
+			throw new IllegalArgumentException("attribute name cannot be null or empty");
+		}
+		JsonNode n = getJsonNode(node, attribute);
 		if (n != null) {
-			return n.textValue();
+			return n.asText();
+		} else {
+			return null;
+		}
+	}
+
+	protected Integer getIntegerValue(JsonNode node, String attribute) {
+		if (node == null) {
+			throw new IllegalArgumentException("Node name cannot be null");
+		}
+		if (attribute == null || attribute.trim().isEmpty()) {
+			throw new IllegalArgumentException("attribute name cannot be null or empty");
+		}
+		JsonNode n = getJsonNode(node, attribute);
+		if (n != null) {
+			return n.intValue();
+		} else {
+			return null;
+		}
+	}
+
+	protected Double getDoubleValue(JsonNode node, String attribute) {
+		if (node == null) {
+			throw new IllegalArgumentException("Node name cannot be null");
+		}
+		if (attribute == null || attribute.trim().isEmpty()) {
+			throw new IllegalArgumentException("attribute name cannot be null or empty");
+		}
+		JsonNode n = getJsonNode(node, attribute);
+		if (n != null) {
+			return n.doubleValue();
+		} else {
+			return null;
+		}
+	}
+
+	protected Boolean getBooleanValue(JsonNode node, String attribute) {
+		if (node == null) {
+			throw new IllegalArgumentException("Node name cannot be null");
+		}
+		if (attribute == null || attribute.trim().isEmpty()) {
+			throw new IllegalArgumentException("attribute name cannot be null or empty");
+		}
+		JsonNode n = getJsonNode(node, attribute);
+		if (n != null) {
+			return n.asBoolean();
 		} else {
 			return null;
 		}

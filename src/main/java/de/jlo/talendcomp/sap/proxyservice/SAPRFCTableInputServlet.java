@@ -53,13 +53,13 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 				sendError(resp, e1.getStatusCode(), e1.getMessage());
 				return;
 			}
-			String tableName = root.get("tableName").asText();
+			String tableName = getStringValue(root, "tableName");
 			if (tableName == null || tableName.trim().isEmpty()) {
 				sendError(resp, 400, "Parameter tableName is not set");
 				return;
 			}
-			JsonNode fields = root.get("fields");
-			if (fields == null || fields.isMissingNode()) {
+			JsonNode fields = getJsonNode(root, "fields");
+			if (fields == null) {
 				sendError(resp, 400, "Fields not set");
 				return;
 			}
@@ -73,26 +73,12 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			} else {
 				fieldList = TextSplitter.split(fields.textValue(), ',');
 			}
-			JsonNode filterNode = root.get("filter");
-			String filter = null;
-			if (filterNode != null) {
-				filter = filterNode.asText();
-			}
-			int offset = 0;
-			JsonNode offsetNode = root.get("offset");
-			if (offsetNode != null) {
-				offset = offsetNode.asInt(0);
-			}
-			int limit = 0;
-			JsonNode limitNode = root.get("limit");
-			if (limitNode != null ) {
-				limit = limitNode.asInt(0);
-			}
 			TableInput tableInput = destination.createTableInput();
 			tableInput.setTableName(tableName);
 			for (String f : fieldList) {
 				tableInput.addField(f);
 			}
+			String filter = getStringValue(root, "filter");
 			tableInput.setFilter(filter);
 			try {
 				tableInput.prepare();
@@ -100,10 +86,47 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 				sendError(resp, 500, "Prepare function failed: " + e.getMessage());
 				return;
 			}
+			Integer offset = getIntegerValue(root, "offset");
 			tableInput.setRowsToSkip(offset);
+			Integer limit = getIntegerValue(root, "limit");
 			tableInput.setMaxRows(limit);
+			final Writer out = resp.getWriter();
+			final Integer keepAliveSeconds = getIntegerValue(root, "keepAliveSeconds");
+			Thread keepAliveThread = null;
+			if (keepAliveSeconds != null && keepAliveSeconds > 0) {
+				keepAliveThread = new Thread() {
+					
+					private boolean statusSet = false;
+					
+					@Override
+					public void run() {
+						while (true) {
+							if (isInterrupted() == false) {
+								try {
+									sleep(keepAliveSeconds * 1000);
+									if (statusSet == false) {
+										resp.setStatus(200);
+										statusSet = true;
+									}
+									out.write("executing\n");
+								} catch (Exception e) {
+									break;
+								}
+							}
+						}
+					}
+					
+				};		
+				keepAliveThread.start();
+			}
 			try {
 				tableInput.execute();
+				if (keepAliveSeconds != null && keepAliveSeconds > 0) {
+					if (keepAliveThread.isAlive()) {
+						keepAliveThread.interrupt();
+					}
+					keepAliveThread = null;
+				}
 			} catch (Exception e) {
 				sendError(resp, 500, "Execute function failed: " + e.getMessage());
 				return;
@@ -112,10 +135,8 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 				info(tableInput.getFunctionDescription());
 			}
 			resp.setHeader("total-rows", String.valueOf(tableInput.getTotalRowCount()));
-			final Writer out = resp.getWriter();
+			resp.setContentType("application/json");
 			try (BufferedWriter br = new BufferedWriter(out)) {
-				resp.setContentType("application/json");
-				resp.setStatus(200);
 				br.write("[\n");
 				boolean firstLoop = true;
 				while (tableInput.next()) {

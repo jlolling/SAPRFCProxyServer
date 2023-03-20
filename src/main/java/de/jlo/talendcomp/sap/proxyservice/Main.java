@@ -14,7 +14,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 public class Main {
 	
-	private static Server server = null;
+	public static Server server = null;
 	private static int port = 9999;
 	private static boolean verbose = false;
 	private static String propertiesFileDir = null;
@@ -46,6 +46,10 @@ public class Main {
 		context.addServlet(new ServletHolder(pingServlet), "/ping");
 		if (verbose) {
 			System.out.println("Add servlet: SAPRFCPingServlet at path: /ping");
+		}
+		context.addServlet(new ServletHolder(new ShutdownServlet()), "/shutdown");
+		if (verbose) {
+			System.out.println("Add servlet: ShutdownServlet at path: /shutdown");
 		}
 		server.setStopAtShutdown(true);
 		// Start the webserver.
