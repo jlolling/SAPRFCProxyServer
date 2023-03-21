@@ -10,6 +10,7 @@ https://github.com/jlolling/talendcomp_tSAPRFC
 # Start the service
 
 ```java -jar saprfcproxyserver-1.1.jar```
+The service use per default port 9999
 
 To stop the serveice simply kill the process.
 
