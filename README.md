@@ -115,7 +115,8 @@ Payload example:
 ```
 * Request failed:
 Status: 400, 
-Content-Type: text/html
+Content-Type: text/html,
+Body: html coded error message
 
 
 ## Test of the presence of the service
