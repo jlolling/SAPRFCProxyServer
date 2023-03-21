@@ -78,6 +78,7 @@ POST ```/tableinput```
 Run the actual query.
 The payload must provide the destination and the attributes to describe the actual query.
 Here an example speaking to an application server. Please refer to the sap-ping request for the message-server payload.
+Only the attributes: tableName and fields is mandatory. Attributes filter, offset, limit can be ommitted or set to null.
 
 ```
 {
