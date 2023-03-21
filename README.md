@@ -2,6 +2,9 @@
 A Server to use as proxy for SAP RFC calls from the Talend components tSAPRFCConnection
 The service accepts the credentials from the calling SAP RFC component.
 
+It is highly recommended to protect this service with a forward-proxy like ngix and establish SSL and IP range filtering with a firwall.
+The request contains sensible information which must be protected.
+
 Start the service with:
 
 ```java -jar saprfcproxyserver-1.0.jar```
@@ -26,6 +29,7 @@ POST ```/sap-ping```
 
 Check the connection to the specified SAP server
 The payload must provide the destination.
+The password can be send clear text or ecrypted in the Talend standard way.
 There are 2 different ways to connect to a SAP server.
 
 * Application Server:
