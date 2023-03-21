@@ -103,7 +103,7 @@ Here an example speaking to an application server. Please refer to the sap-ping 
 Status: 200, 
 Content-Type: application/json
 
-Payload example:
+Body example:
 ```
 [
 ["0000006392","0010051021"],
