@@ -1,6 +1,4 @@
 # SAPRFCProxyServer
-A Server to use as proxy for SAP RFC calls from the Talend components tSAPRFCConnection
-The service accepts the credentials from the calling SAP RFC component.
 
 It is highly recommended to protect this service with a forward-proxy like ngix and establish SSL and IP range filtering with a firwall.
 The request contains sensible information which must be protected.
