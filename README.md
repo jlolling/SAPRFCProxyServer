@@ -98,9 +98,25 @@ Here an example speaking to an application server. Please refer to the sap-ping 
 }
 ```
 
-The response is 200 and as payload a json array of array of string values according to the field list given in the request.
-If the request failed: status: 400 with a error message.
-Response Content-Type is: application/json
+* Response OK:
+
+Status: 200, 
+Content-Type: application/json
+
+Payload example:
+```
+[
+["0000006392","0010051021"],
+["0000022047","0010050266"],
+["0000023825","0010012228"],
+["0000030460","0010183904"],
+["0000032123","0010012228"]
+]
+```
+* Request failed:
+Status: 400, 
+Content-Type: text/html
+
 
 ## Test of the presence of the service
 
