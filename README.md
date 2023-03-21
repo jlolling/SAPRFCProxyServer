@@ -7,7 +7,7 @@ The request contains sensible information which must be protected.
 
 Start the service with:
 
-```java -jar saprfcproxyserver-1.0.jar```
+```java -jar saprfcproxyserver-1.1.jar```
 
 To stop the serveice simply kill the process.
 
