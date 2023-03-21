@@ -9,7 +9,7 @@ This webservice is used currently by the Talend components tSAPRFCConnection and
 
 https://github.com/jlolling/talendcomp_tSAPRFC
 
-Start the service with:
+# Start the service
 
 ```java -jar saprfcproxyserver-1.1.jar```
 
