@@ -11,7 +11,7 @@ https://github.com/jlolling/talendcomp_tSAPRFC
 
 ```java -jar saprfcproxyserver-1.1.jar```
 
-To stop the serveice simply kill the process.
+To stop the service simply kill the process.
 
 Help page output with parameter -h or --help
 
