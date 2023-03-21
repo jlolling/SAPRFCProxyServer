@@ -94,7 +94,7 @@ Here an example speaking to an application server. Please refer to the sap-ping 
   "fields":["KUNNR","BUKRS"],
   "filter":"KUNNR > 1000",
   "offset":100,
-  "limit":1000
+  "limit":5
 }
 ```
 
