@@ -122,7 +122,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			}
 			try {
 				tableInput.execute();
-				if (keepAliveSeconds != null && keepAliveSeconds > 0) {
+				if (keepAliveThread != null) {
 					if (keepAliveThread.isAlive()) {
 						keepAliveThread.interrupt();
 					}
@@ -154,7 +154,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 					br.write(objectMapper.writeValueAsString(oneRowArrayNode));
 					br.flush();
 				}
-				br.write("\n]");
+				br.write("\n]\n");
 				br.flush();
 			} catch (Exception e) {
 				sendError(resp, 500, "Processing SAP RFC response failed: " + e.getMessage());
@@ -194,7 +194,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 				br.write(objectMapper.writeValueAsString(outrow));
 				br.flush();
 			}
-			br.write("\n]");
+			br.write("\n]\n");
 			br.flush();
 		} catch (Exception e) {
 			sendError(resp, 500, "Processing SAP RFC response failed: " + e.getMessage());
