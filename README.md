@@ -3,6 +3,10 @@
 It is highly recommended to protect this service with a forward-proxy like ngix and establish SSL and IP range filtering with a firwall.
 The request contains sensible information which must be protected.
 
+## Dependencies
+This service needs the sapjco3.jar and a native lib according to the system OS. You can put both files into the folder of the saprfcproxyserver-<version>.jar
+Please download both from the SAP support: [SAP JCo download](https://support.sap.com/en/product/connectors/jco.html)
+
 This webservice is used currently by the Talend components tSAPRFCConnection and tSAPRFCTableInput.
 
 https://github.com/jlolling/talendcomp_tSAPRFC
