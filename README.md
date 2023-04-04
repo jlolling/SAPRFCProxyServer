@@ -5,16 +5,13 @@ The request contains sensible information which must be protected.
 
 ## Dependencies
 This service needs the sapjco3.jar and a native lib according to the system OS.
-
-Because this service use the function RFC_READ_TABLE which is installed in all SAP systems, there are no dependencies releated to the SAP system. This is important in use cases in which you cannot install any more convienent functions in the SAP system (the author of this service was faced exactly with this problem).
-
 You can put both files into the folder of the saprfcproxyserver-{version}.jar.
 
 Please download both from the SAP support: [SAP JCo download](https://support.sap.com/en/product/connectors/jco.html)
 
-This webservice is used currently by the Talend components tSAPRFCConnection and tSAPRFCTableInput.
+This webservice is used currently by the Talend components tSAPRFCConnection and tSAPRFCTableInput: [Github repo](https://github.com/jlolling/talendcomp_tSAPRFC)
 
-https://github.com/jlolling/talendcomp_tSAPRFC
+Because this service use the function RFC_READ_TABLE which is installed in all SAP systems, there are no dependencies releated to the SAP system. This is important in use cases in which you cannot install any more convienent functions in the SAP system (the author of this service was faced exactly with this problem).
 
 # Start the service
 
