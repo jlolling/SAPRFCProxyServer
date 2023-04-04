@@ -106,6 +106,15 @@ Only the attributes: tableName and fields is mandatory. Attributes filter, offse
   "limit":5
 }
 ```
+Because of the limitation of the used so called standard component RFC_READ_TABLE the filter expression cannot be longer as 72 chars.
+If longer a new OPTION line must be set. The service allows to split long filter expression with the delimiter ; into parts smaller than 72 chars.
+You cannot split within a comparison and not within a string literal but you can split between comparisions and within literal lists (in operator).
+
+Here an example:
+
+```"KUNNR in (100,200,300,400,500) ; or KUNNR in (600,7000,800,900); and BURKS = 'BLN'"```
+
+Please be aware SAP expects between identifiers and operators always a space!
 
 * Response OK:
 
