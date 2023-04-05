@@ -9,8 +9,11 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+
+import io.prometheus.client.hotspot.DefaultExports;
 
 public class Main {
 	
@@ -30,6 +33,10 @@ public class Main {
 		ServletContextHandler context = new ServletContextHandler();
 		context.setContextPath("/");
 		server.setHandler(context);
+		context.addFilter(new FilterHolder(new PrometheusMetricsFilter()), "/*", null);
+		if (verbose) {
+			System.out.println("Add filter: PrometheusMetricsFilter at pattern: /*");
+		}
 		// Add SAP RFC servlet
 		SAPRFCTableInputServlet tableInputServlet = new SAPRFCTableInputServlet();
 		tableInputServlet.setPropertyFileDir(propertiesFileDir);
@@ -52,6 +59,14 @@ public class Main {
 			System.out.println("Add servlet: ShutdownServlet at path: /shutdown");
 		}
 		context.addServlet(new ServletHolder(new PingServlet()), "/ping");
+		if (verbose) {
+			System.out.println("Add servlet: PingServlet at path: /ping");
+		}
+		context.addServlet(new ServletHolder(new PrometheusMetricServlet()), "/metrics");
+		DefaultExports.initialize();
+		if (verbose) {
+			System.out.println("Add servlet: PrometheusMetricServlet at path: /metrics");
+		}
 		server.setStopAtShutdown(true);
 		// Start the webserver.
 		server.start();
