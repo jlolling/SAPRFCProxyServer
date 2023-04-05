@@ -150,9 +150,9 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 						firstLoop = false;
 					} else {
 						br.write(",\n");
+						br.flush();
 					}
 					br.write(objectMapper.writeValueAsString(oneRowArrayNode));
-					br.flush();
 				}
 				br.write("\n]\n");
 				br.flush();
