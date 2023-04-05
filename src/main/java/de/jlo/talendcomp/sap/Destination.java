@@ -6,4 +6,6 @@ public interface Destination {
 	
 	public void ping() throws Exception;
 	
+	public void close();
+	
 }

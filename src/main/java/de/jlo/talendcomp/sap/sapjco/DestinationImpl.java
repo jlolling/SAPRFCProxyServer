@@ -33,6 +33,9 @@ public class DestinationImpl implements Destination {
 	
 	@Override
 	public void ping() throws Exception {
+		if (jcoDestination == null) {
+			throw new IllegalStateException("Destination is already closed");
+		}
 		try {
 			this.jcoDestination.ping();
 		} catch (Exception e) {
@@ -44,6 +47,11 @@ public class DestinationImpl implements Destination {
 	public TableInput createTableInput() {
 		TableInputImpl ti = new TableInputImpl(jcoDestination);
 		return ti;
+	}
+	
+	@Override
+	public void close() {
+		this.jcoDestination = null;
 	}
 	
 }
