@@ -1,7 +1,3 @@
-package de.jlo.talendcomp.sap;
-
-import java.util.Properties;
-
 /**
  * Copyright 2023 Jan Lolling jan.lolling@gmail.com
  * 
@@ -17,6 +13,10 @@ import java.util.Properties;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package de.jlo.talendcomp.sap;
+
+import java.util.Properties;
+
 public class ApplicationServerProperties implements ConnectionProperties {
 
 	private String user = null;

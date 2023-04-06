@@ -1,3 +1,18 @@
+/**
+ * Copyright 2023 Jan Lolling jan.lolling@gmail.com
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package de.jlo.talendcomp.sap.proxyservice;
 
 import java.io.IOException;
@@ -14,7 +29,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * 
+ * A simplified filter to collect the count and duration of the requests
+ * @author jan.lolling@gmail.com
  */
 public class PrometheusMetricsFilter implements Filter {
 
@@ -22,24 +38,28 @@ public class PrometheusMetricsFilter implements Filter {
     private Counter statusCounter = null;
     private int pathComponents = 1;
     boolean stripContextPath = false;
-    
-	public PrometheusMetricsFilter() {
+    private String timebucketsStr = "0.001,0.1,1,10,100";
 
-    }
-
-    @Override
+	@Override
     public void init(FilterConfig filterConfig) throws ServletException {
         Histogram.Builder builder = Histogram.build()
                 .labelNames("path", "method");
+        String[] bucketParams = timebucketsStr.split(",");
+        double[] buckets = new double[bucketParams.length];
+
+        for (int i = 0; i < bucketParams.length; i++) {
+            buckets[i] = Double.parseDouble(bucketParams[i]);
+        }
+        if (buckets != null && buckets.length > 0) {
+            builder = builder.buckets(buckets);
+        }
         histogram = builder
                 .help("Request duration")
                 .name("duration")
                 .register();
-
-        statusCounter = Counter.build("duration_status_total", "HTTP status codes of Request duration")
+        statusCounter = Counter.build("request_status_total", "HTTP status codes of requests")
                 .labelNames("path", "method", "status")
                 .register();
-
     }
 
     @Override
@@ -48,11 +68,22 @@ public class PrometheusMetricsFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
-        MetricData data = startTimer((HttpServletRequest) servletRequest);
+        HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
+        String requestUri = httpRequest.getRequestURI();
+        boolean measureIt = false; 
+        if (requestUri != null) {
+        	measureIt = requestUri.contains("/tableinput") || requestUri.contains("/sap-ping");
+        }
+        MetricData data = null;
+    	if (measureIt) {
+    		data = startTimer(httpRequest);
+    	}
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
-        	observeDuration(data, (HttpServletResponse) servletResponse);
+        	if (data != null) {
+            	observeDuration(data, (HttpServletResponse) servletResponse);
+        	}
         }
     }
 
@@ -115,5 +146,15 @@ public class PrometheusMetricsFilter implements Filter {
         }
         
     }
+
+    public String getTimebucketsStr() {
+		return timebucketsStr;
+	}
+
+	public void setTimebucketsStr(String timebucketsStr) {
+		if (timebucketsStr != null && timebucketsStr.length() > 0) {
+			this.timebucketsStr = timebucketsStr;
+		}
+	}
 
 }

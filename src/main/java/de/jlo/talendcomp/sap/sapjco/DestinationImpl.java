@@ -1,10 +1,3 @@
-package de.jlo.talendcomp.sap.sapjco;
-
-import com.sap.conn.jco.JCoDestination;
-
-import de.jlo.talendcomp.sap.Destination;
-import de.jlo.talendcomp.sap.TableInput;
-
 /**
  * Copyright 2023 Jan Lolling jan.lolling@gmail.com
  * 
@@ -20,6 +13,13 @@ import de.jlo.talendcomp.sap.TableInput;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package de.jlo.talendcomp.sap.sapjco;
+
+import com.sap.conn.jco.JCoDestination;
+
+import de.jlo.talendcomp.sap.Destination;
+import de.jlo.talendcomp.sap.TableInput;
+
 public class DestinationImpl implements Destination {
 	
 	private JCoDestination jcoDestination = null;

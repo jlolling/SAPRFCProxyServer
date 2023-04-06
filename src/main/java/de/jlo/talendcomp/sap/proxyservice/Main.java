@@ -1,3 +1,18 @@
+/**
+ * Copyright 2023 Jan Lolling jan.lolling@gmail.com
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package de.jlo.talendcomp.sap.proxyservice;
 
 import java.lang.management.ManagementFactory;
@@ -21,6 +36,7 @@ public class Main {
 	private static int port = 9999;
 	private static boolean verbose = false;
 	private static String propertiesFileDir = null;
+	private static String buckets = null;
 
 	public static void start() throws Exception {
 		if (port < 1) {
@@ -33,7 +49,9 @@ public class Main {
 		ServletContextHandler context = new ServletContextHandler();
 		context.setContextPath("/");
 		server.setHandler(context);
-		context.addFilter(new FilterHolder(new PrometheusMetricsFilter()), "/*", null);
+		PrometheusMetricsFilter pm = new PrometheusMetricsFilter();
+		pm.setTimebucketsStr(buckets);
+		context.addFilter(new FilterHolder(pm), "/*", null);
 		if (verbose) {
 			System.out.println("Add filter: PrometheusMetricsFilter at pattern: /*");
 		}
@@ -87,7 +105,8 @@ public class Main {
     	options.addOption("p", "port", true, "Port of the server");
     	options.addOption("v", "verbose", false, "Print statements to console");
     	options.addOption("h", "help", false, "Print help to console, do nothing else.");
-    	options.addOption("d", "dest-prop-dir", true, "Dir for destination properties files");
+    	options.addOption("b", "buckets", true, "Buckets for measure and count the request durations");
+//    	options.addOption("d", "dest-prop-dir", true, "Dir for destination properties files");
     	CommandLineParser parser = new DefaultParser();
     	CommandLine cmd = parser.parse( options, args);
     	String portStr = cmd.getOptionValue('p', "9999");
@@ -106,6 +125,7 @@ public class Main {
 			System.exit(4);
     	}
     	propertiesFileDir = cmd.getOptionValue('d');
+    	buckets = cmd.getOptionValue('b');
     	System.out.println("Start SAP RFC Proxy Server at port: " + port);
     	start();
 	}
