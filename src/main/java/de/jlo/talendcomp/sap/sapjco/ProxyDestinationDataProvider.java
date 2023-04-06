@@ -1,15 +1,3 @@
-package de.jlo.talendcomp.sap.sapjco;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
-import com.sap.conn.jco.ext.DataProviderException;
-import com.sap.conn.jco.ext.DestinationDataEventListener;
-import com.sap.conn.jco.ext.DestinationDataProvider;
-
-import de.jlo.talendcomp.sap.ConnectionProperties;
-
 /**
  * Copyright 2023 Jan Lolling jan.lolling@gmail.com
  * 
@@ -25,6 +13,18 @@ import de.jlo.talendcomp.sap.ConnectionProperties;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package de.jlo.talendcomp.sap.sapjco;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import com.sap.conn.jco.ext.DataProviderException;
+import com.sap.conn.jco.ext.DestinationDataEventListener;
+import com.sap.conn.jco.ext.DestinationDataProvider;
+
+import de.jlo.talendcomp.sap.ConnectionProperties;
+
 /**
  * This is a custom DestinationDataProvider to provide the settings given from the Talend job
  * to the DestinationManager
