@@ -1,5 +1,12 @@
 # SAPRFCProxyServer
 
+This is a RESTful web service which runs SAP RFC calls using the RFC function RFC_READ_TABLE. The service takes the query as json POST request.
+The advatage of using this service is:
+* Allows to have only one place where the SAP JCo driver is needed
+* Simplifies the ETL jobs because they do not need the SAP JCo driver
+* Run the SAP RFC queries from one server which is enabled to do that (mostly SAP services are protected by IP filtering firewalls)
+* The service has maintenance features allows runnig it behind load balances
+
 It is highly recommended to protect this service with a forward-proxy like ngix and establish SSL and IP range filtering with a firwall.
 The request contains sensible information which must be protected.
 
