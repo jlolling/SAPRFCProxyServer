@@ -152,7 +152,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 				info(tableInput.getFunctionDescription());
 			}
 			resp.setHeader("total-rows", String.valueOf(tableInput.getTotalRowCount()));
-			resp.setContentType("application/json");
+			resp.setContentType("application/json; charset=utf-8");
 			try (BufferedWriter br = new BufferedWriter(out)) {
 				br.write("[\n");
 				boolean firstLoop = true;
