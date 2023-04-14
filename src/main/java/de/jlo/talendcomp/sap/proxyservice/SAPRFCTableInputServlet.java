@@ -60,6 +60,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			sendError(resp, 400, "No payload received");
 			return;
 		} else {
+			resp.setCharacterEncoding("UTF-8");
 			ObjectNode root = (ObjectNode) objectMapper.readTree(payload);
 			Destination destination;
 			try {
@@ -157,6 +158,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 				boolean firstLoop = true;
 				while (tableInput.next()) {
 					List<String> oneRow = tableInput.getCurrentRow();
+					System.out.println(oneRow.get(0));
 					ArrayNode oneRowArrayNode = objectMapper.createArrayNode();
 					for (String v : oneRow) {
 						oneRowArrayNode.add(v);
@@ -167,7 +169,8 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 						br.write(",\n");
 						br.flush();
 					}
-					br.write(objectMapper.writeValueAsString(oneRowArrayNode));
+					String json = objectMapper.writeValueAsString(oneRowArrayNode);
+					br.write(json);
 				}
 				br.write("\n]\n");
 				br.flush();
@@ -224,6 +227,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			String payload = IOUtils.toString(r);
 			performQuery(payload, resp);
 		} else {
+			resp.setCharacterEncoding("UTF-8");
 			int testRows = 1000;
 			try {
 				testRows = Integer.parseInt(testrowsStr);
