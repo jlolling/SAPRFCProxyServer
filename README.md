@@ -22,7 +22,7 @@ Because this service use the function RFC_READ_TABLE which is installed in all S
 
 # Start the service
 
-```java -jar saprfcproxyserver-1.1.jar```
+```java -jar saprfcproxyserver-2.1.jar```
 
 To stop the service simply kill the process.
 
