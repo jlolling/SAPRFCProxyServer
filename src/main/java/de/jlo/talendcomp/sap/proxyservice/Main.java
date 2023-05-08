@@ -15,7 +15,9 @@
  */
 package de.jlo.talendcomp.sap.proxyservice;
 
+import java.io.InputStream;
 import java.lang.management.ManagementFactory;
+import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -40,6 +42,7 @@ public class Main {
 	private static boolean verbose = false;
 	private static String propertiesFileDir = null;
 	private static String buckets = null;
+	private static String version = null;
 
 	public static void start() throws Exception {
 		if (port < 1) {
@@ -105,22 +108,46 @@ public class Main {
     	String portStr = cmd.getOptionValue('p', "9999");
     	verbose = cmd.hasOption('v');
     	boolean help = cmd.hasOption('h');
+		version = readVersionNumber();
     	if (help) {
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("java -jar saprfcproxy-<version>.jar", options);
+			formatter.setWidth(200);
+			formatter.printHelp("java -Dlog4j.configurationFile=log4j2.xml -jar saprfcproxyserver-" + version + ".jar", options);
 			System.exit(0);
     	}
     	try {
     		port = Integer.valueOf(portStr);
     	} catch (Exception e) {
+			log.error("Cannot parse port number: " + portStr);
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("java -jar saprfcproxy-<version>.jar", options);
+			formatter.setWidth(200);
+			formatter.printHelp("java -Dlog4j.configurationFile=log4j2.xml -jar saprfcproxyserver-" + version + ".jar", options);
 			System.exit(4);
     	}
     	propertiesFileDir = cmd.getOptionValue('d');
     	buckets = cmd.getOptionValue('b');
-    	log.info("Configuring SAP RFC Proxy Server at port: " + port);
+    	log.info("Configuring SAP RFC Proxy Server (version " + version + ") at port: " + port);
     	start();
+	}
+
+	public static String readVersionNumber() {
+		String groupId = "de.jlo.talendcomp";
+		String artifactId = "saprfcproxyserver";
+		String pomPropertyResource = "/META-INF/maven/" + groupId + "/" + artifactId + "/pom.properties";
+		try {
+			InputStream in = Main.class.getResourceAsStream(pomPropertyResource);
+			if (in == null) {
+				log.warn("Resource: " + pomPropertyResource + " not found!");
+			} else {
+				Properties mavenProps = new Properties();
+				mavenProps.load(in);
+				in.close();
+				return mavenProps.getProperty("version");
+			}
+		} catch (Exception e) {
+			log.warn("Load maven properties failed: " + e.getMessage(), e);
+		}
+		return null;
 	}
 
 }

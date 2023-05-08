@@ -60,7 +60,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			sendError(resp, 400, "No payload received");
 			return;
 		} else {
-			resp.setCharacterEncoding("UTF-8");
+			resp.setCharacterEncoding("UTF-8"); // must be done before we get the writer!
 			ObjectNode root = (ObjectNode) objectMapper.readTree(payload);
 			Destination destination;
 			try {
@@ -129,6 +129,8 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 								} catch (Exception e) {
 									break;
 								}
+							} else {
+								break;
 							}
 						}
 					}
@@ -138,15 +140,16 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			}
 			try {
 				tableInput.execute();
+			} catch (Exception e) {
+				sendError(resp, 500, "Execute function failed: " + e.getMessage());
+				return;
+			} finally {
 				if (keepAliveThread != null) {
 					if (keepAliveThread.isAlive()) {
 						keepAliveThread.interrupt();
 					}
 					keepAliveThread = null;
 				}
-			} catch (Exception e) {
-				sendError(resp, 500, "Execute function failed: " + e.getMessage());
-				return;
 			}
 			if (logStatements) {
 				info(tableInput.getFunctionDescription());
@@ -193,7 +196,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 	private void performTestoutput(int numTestRecords, int numTestColumns, HttpServletResponse resp) throws ServletException, IOException {
 		final Writer out = resp.getWriter();
 		try (BufferedWriter br = new BufferedWriter(out)) {
-			resp.setContentType("application/json");
+			resp.setContentType("application/json; charset=utf-8");
 			resp.setStatus(200);
 			resp.setHeader("total-rows", String.valueOf(numTestRecords));
 			br.write("[\n");
@@ -208,9 +211,9 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 					firstLoop = false;
 				} else {
 					br.write(",\n");
+					br.flush();
 				}
 				br.write(objectMapper.writeValueAsString(outrow));
-				br.flush();
 			}
 			br.write("\n]\n");
 			br.flush();

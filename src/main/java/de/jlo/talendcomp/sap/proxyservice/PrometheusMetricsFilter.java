@@ -38,7 +38,7 @@ public class PrometheusMetricsFilter implements Filter {
     private Counter statusCounter = null;
     private int pathComponents = 1;
     boolean stripContextPath = false;
-    private String timebucketsStr = "0.001,0.1,1,10,100";
+    private String timebucketsStr = "0.001,0.1,1,10,100,1000";
 
 	@Override
     public void init(FilterConfig filterConfig) throws ServletException {
