@@ -22,6 +22,8 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -32,6 +34,7 @@ import io.prometheus.client.hotspot.DefaultExports;
 
 public class Main {
 	
+	private static Logger log = LogManager.getLogger(Main.class);	
 	public static Server server = null;
 	private static int port = 9999;
 	private static boolean verbose = false;
@@ -52,41 +55,30 @@ public class Main {
 		PrometheusMetricsFilter pm = new PrometheusMetricsFilter();
 		pm.setTimebucketsStr(buckets);
 		context.addFilter(new FilterHolder(pm), "/*", null);
-		if (verbose) {
-			System.out.println("Add filter: PrometheusMetricsFilter at pattern: /*");
-		}
+		log.info("Add filter: PrometheusMetricsFilter at pattern: /*");
 		// Add SAP RFC servlet
 		SAPRFCTableInputServlet tableInputServlet = new SAPRFCTableInputServlet();
 		tableInputServlet.setPropertyFileDir(propertiesFileDir);
 		tableInputServlet.setup();
 		tableInputServlet.setLogStatements(verbose);
-		if (verbose) {
-			System.out.println("Add servlet: SAPRFCTableInputServlet at path: /tableinput");
-		}
+		log.info("Add servlet: SAPRFCTableInputServlet at path: /tableinput");
 		context.addServlet(new ServletHolder(tableInputServlet), "/tableinput");
 		SAPRFCPingServlet pingServlet = new SAPRFCPingServlet();
 		tableInputServlet.setPropertyFileDir(propertiesFileDir);
 		pingServlet.setup();
 		pingServlet.setLogStatements(verbose);
 		context.addServlet(new ServletHolder(pingServlet), "/sap-ping");
-		if (verbose) {
-			System.out.println("Add servlet: SAPRFCPingServlet at path: /sap-ping");
-		}
+		log.info("Add servlet: SAPRFCPingServlet at path: /sap-ping");
 		context.addServlet(new ServletHolder(new ShutdownServlet()), "/shutdown");
-		if (verbose) {
-			System.out.println("Add servlet: ShutdownServlet at path: /shutdown");
-		}
+		log.info("Add servlet: ShutdownServlet at path: /shutdown");
 		context.addServlet(new ServletHolder(new PingServlet()), "/ping");
-		if (verbose) {
-			System.out.println("Add servlet: PingServlet at path: /ping");
-		}
+		log.info("Add servlet: PingServlet at path: /ping");
 		context.addServlet(new ServletHolder(new PrometheusMetricServlet()), "/metrics");
 		DefaultExports.initialize();
-		if (verbose) {
-			System.out.println("Add servlet: PrometheusMetricServlet at path: /metrics");
-		}
+		log.info("Add servlet: PrometheusMetricServlet at path: /metrics");
 		server.setStopAtShutdown(true);
 		// Start the webserver.
+		log.info("Start server");
 		server.start();
 	}
 	
@@ -98,6 +90,7 @@ public class Main {
 				// ignore
 			}
 		}
+		LogManager.shutdown();
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -126,7 +119,7 @@ public class Main {
     	}
     	propertiesFileDir = cmd.getOptionValue('d');
     	buckets = cmd.getOptionValue('b');
-    	System.out.println("Start SAP RFC Proxy Server at port: " + port);
+    	log.info("Configuring SAP RFC Proxy Server at port: " + port);
     	start();
 	}
 

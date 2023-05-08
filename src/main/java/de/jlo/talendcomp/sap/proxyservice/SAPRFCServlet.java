@@ -16,12 +16,12 @@
 package de.jlo.talendcomp.sap.proxyservice;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.servlet.DefaultServlet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -41,6 +41,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public abstract class SAPRFCServlet extends DefaultServlet {
 
+	private static Logger log = LogManager.getLogger(SAPRFCServlet.class);
 	private static final long serialVersionUID = 1L;
 	private Driver driver = null;
 	protected final static ObjectMapper objectMapper = new ObjectMapper();
@@ -247,27 +248,21 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 	}
 	
 	public void sendError(HttpServletResponse resp, int code, String message) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		System.err.print(sdf.format(new Date()) + " " + this.getClass().getSimpleName() + " [ERROR] code: " + code);
-		System.err.println(" message: " + message);
+		log.error(this.getClass().getSimpleName() + ": code: " + code + " message: " + message);
 		try {
 			resp.sendError(code, message);
 		} catch (IOException e) {
-			System.err.println("sendError code: " + code + " message: " + message + " failed: " + e.getMessage());
+			log.error("sendError code: " + code + " message: " + message + " failed: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
 	
 	public void info(String message) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		System.out.print(sdf.format(new Date()) + " " + this.getClass().getSimpleName() + " [INFO] ");
-		System.out.println(message);
+		log.info(this.getClass().getSimpleName() + ": " + message);
 	}
 
 	public void warn(String message) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		System.err.print(sdf.format(new Date()) + " " + this.getClass().getSimpleName() + " [WARNING] ");
-		System.err.println(message);
+		log.warn(this.getClass().getSimpleName() + ": " + message);
 	}
 
 }
