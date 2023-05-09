@@ -15,6 +15,7 @@
  */
 package de.jlo.talendcomp.sap.proxyservice;
 
+import java.io.File;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.util.Properties;
@@ -116,6 +117,7 @@ public class Main {
 			formatter.printHelp("java -Dlog4j.configurationFile=log4j2.xml -jar saprfcproxyserver-" + version + ".jar", options);
 			System.exit(0);
     	}
+    	checkLog4jConfigFile();
     	try {
     		port = Integer.valueOf(portStr);
     	} catch (Exception e) {
@@ -149,6 +151,19 @@ public class Main {
 			log.warn("Load maven properties failed: " + e.getMessage(), e);
 		}
 		return null;
+	}
+	
+	private static void checkLog4jConfigFile() {
+		String filename = System.getProperty("log4j2.configurationFile");
+		if (filename == null || filename.trim().isEmpty()) {
+			System.err.println("WARNING: No log4j configuration file given per environment variable log4j2.configurationFile. Log will only appears in console output and logger treshold is ERROR");
+		} else {
+			File f = new File(filename);
+			if (f.exists() == false) {
+				System.err.println("Given log4j2 config file: " + f.getAbsolutePath() + " does not exist! Abort.");
+				System.exit(-1);
+			}
+		}
 	}
 
 }
