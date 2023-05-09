@@ -52,6 +52,7 @@ public class Main {
 		MBeanContainer mbContainer = new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
 		server.addEventListener(mbContainer);
 		server.addBean(mbContainer);
+		server.setStopAtShutdown(true);
 		ServletContextHandler context = new ServletContextHandler();
 		context.setContextPath("/");
 		server.setHandler(context);
