@@ -20,9 +20,14 @@ This webservice is used currently by the Talend components tSAPRFCConnection and
 
 Because this service use the function RFC_READ_TABLE which is installed in all SAP systems, there are no dependencies releated to the SAP system. This is important in use cases in which you cannot install any more convienent functions in the SAP system (the author of this service was faced exactly with this problem).
 
+## Logging
+
+You can configure the usage of Log4J2 for this service with the environment variable log4j2.configurationFile pointing to a log4j2 config file (with the formats: xml, yml, properties, json). If the file is located within the root dir of the service, simple setup the environment with the name of the file, otherwise set the absolute path of the configuration file. In the source dir of the project you will find a good start of a log4j2.xml file.
+The example log file creates a log file service.log in the sub dir log/ and roll every day the log file and archive them in a folder log/yyyy-MM/service-yyyy-MM-dd_<index>.log
+
 # Start the service
 
-```java -jar saprfcproxyserver-2.1.jar```
+```java -Dlog4j2.configurationFile=log4j2.xml -jar saprfcproxyserver-2.2.jar```
 
 To stop the service simply kill the process.
 
@@ -37,6 +42,10 @@ usage: java -jar saprfcproxy-<version>.jar
 
 The service use per default port 9999
 
+# Stop the service
+
+With the help of a REST client (like Talend API Tester or SoapUI) you can call the endpoint and this will shutdown the service.
+```OPTIONS http://<yourserver>:<yourport>/shutdown```
 
 # Endpoints
 All endpoints expects application/json as Content-Type
