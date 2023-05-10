@@ -29,8 +29,6 @@ The example log file creates a log file service.log in the sub dir log/ and roll
 
 ```java -Dlog4j2.configurationFile=log4j2.xml -jar saprfcproxyserver-2.2.jar```
 
-To stop the service simply kill the process.
-
 Help page output with parameter -h or --help
 
 ```
@@ -43,8 +41,7 @@ usage: java -jar saprfcproxy-<version>.jar
 The service use per default port 9999
 
 # Stop the service
-
-With the help of a REST client (like Talend API Tester or SoapUI) you can call the endpoint and this will shutdown the service.
+You can simply kill the process or you can gracefully shutdown the service with the help of a REST client (like Talend API Tester or SoapUI). Please call the endpoint (below) and this will shutdown the service.
 ```OPTIONS http://<yourserver>:<yourport>/shutdown```
 
 # Endpoints
