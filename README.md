@@ -42,6 +42,7 @@ The service use per default port 9999
 
 # Stop the service
 You can simply kill the process or you can gracefully shutdown the service with the help of a REST client (like Talend API Tester or SoapUI). Please call the endpoint (below) and this will shutdown the service.
+ 
 ```OPTIONS http://<yourserver>:<yourport>/shutdown```
 
 # Endpoints
