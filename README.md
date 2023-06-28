@@ -131,8 +131,14 @@ Please be aware SAP expects between identifiers and operators always a space!
 
 * Response OK:
 
-Status: 200, 
-Content-Type: application/json
+Header:
+```
+Status: 200
+Content-Type: application/json;charset=utf-8
+total-rows: 5
+Transfer-Encoding: chunked
+Server: Jetty(11.0.14)
+```
 
 Body example:
 ```
