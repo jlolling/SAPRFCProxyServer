@@ -27,7 +27,7 @@ The example log file creates a log file service.log in the sub dir log/ and roll
 
 # Start the service
 
-```java -Dlog4j2.configurationFile=log4j2.xml -jar saprfcproxyserver-2.2.jar```
+```java -Dlog4j2.configurationFile=log4j2.xml -jar saprfcproxyserver-2.3.jar```
 
 Help page output with parameter -h or --help
 
@@ -36,6 +36,7 @@ usage: java -jar saprfcproxy-<version>.jar
  -h,--help                  Print help to console, do nothing else.
  -p,--port <arg>            Port of the server
  -v,--verbose               Print statements to console
+ -c,--chunking              Force chunking (omitted per default)
 ```
 
 The service use per default port 9999
