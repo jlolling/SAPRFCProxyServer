@@ -43,6 +43,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SAPRFCTableInputServlet extends SAPRFCServlet {
 
 	private static final long serialVersionUID = 1L;
+	private boolean forceChunking = false;
 
 	/**
 	 * Request
@@ -125,7 +126,9 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 										statusSet = true;
 									}
 									out.write("executing\n");
-									out.flush();
+									if (forceChunking) {
+										out.flush();
+									}
 								} catch (Exception e) {
 									break;
 								}
@@ -161,7 +164,6 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 				boolean firstLoop = true;
 				while (tableInput.next()) {
 					List<String> oneRow = tableInput.getCurrentRow();
-					System.out.println(oneRow.get(0));
 					ArrayNode oneRowArrayNode = objectMapper.createArrayNode();
 					for (String v : oneRow) {
 						oneRowArrayNode.add(v);
@@ -170,13 +172,17 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 						firstLoop = false;
 					} else {
 						br.write(",\n");
-						br.flush();
+						if (forceChunking) {
+							br.flush();
+						}
 					}
 					String json = objectMapper.writeValueAsString(oneRowArrayNode);
 					br.write(json);
 				}
 				br.write("\n]\n");
-				br.flush();
+				if (forceChunking) {
+					br.flush();
+				}
 			} catch (Exception e) {
 				sendError(resp, 500, "Processing SAP RFC response failed: " + e.getMessage());
 			}
@@ -211,12 +217,16 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 					firstLoop = false;
 				} else {
 					br.write(",\n");
-					br.flush();
+					if (forceChunking) {
+						br.flush();
+					}
 				}
 				br.write(objectMapper.writeValueAsString(outrow));
 			}
 			br.write("\n]\n");
-			br.flush();
+			if (forceChunking) {
+				br.flush();
+			}
 		} catch (Exception e) {
 			sendError(resp, 500, "Processing SAP RFC response failed: " + e.getMessage());
 		}
@@ -251,6 +261,14 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 	@Override
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		doPost(req, resp);
+	}
+
+	public boolean isForceChunking() {
+		return forceChunking;
+	}
+
+	public void setForceChunking(boolean forceChunking) {
+		this.forceChunking = forceChunking;
 	}
 
 }
