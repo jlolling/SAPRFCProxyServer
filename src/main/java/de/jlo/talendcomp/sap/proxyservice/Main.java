@@ -44,7 +44,7 @@ public class Main {
 	private static String propertiesFileDir = null;
 	private static String buckets = null;
 	private static String version = null;
-	private static boolean forceChunking = false;
+	private static boolean forceChunking = true;
 
 	public static void start() throws Exception {
 		if (port < 1) {
@@ -106,7 +106,7 @@ public class Main {
     	options.addOption("v", "verbose", false, "Print statements to console");
     	options.addOption("h", "help", false, "Print help to console, do nothing else.");
     	options.addOption("b", "buckets", true, "Buckets for measure and count the request durations");
-    	options.addOption("c", "chunking", false, "Force chunking");
+    	options.addOption("c", "chunking", false, "Force chunking (true | false, default=true)");
     	CommandLineParser parser = new DefaultParser();
     	CommandLine cmd = parser.parse( options, args);
     	String portStr = cmd.getOptionValue('p', "9999");
@@ -131,7 +131,8 @@ public class Main {
     	}
     	propertiesFileDir = cmd.getOptionValue('d');
     	buckets = cmd.getOptionValue('b');
-    	forceChunking = cmd.hasOption('c');
+    	String forceChunkingStr = cmd.getOptionValue('c');
+    	forceChunking = (forceChunkingStr != null && "true".equals(forceChunkingStr));
     	log.info("Configuring SAP RFC Proxy Server (version " + version + ") at port: " + port);
     	start();
 	}
