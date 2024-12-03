@@ -18,7 +18,7 @@ package de.jlo.talendcomp.sap.proxyservice;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.ee10.servlet.DefaultServlet;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
