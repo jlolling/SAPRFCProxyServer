@@ -12,6 +12,9 @@ The request contains sensible information which must be protected.
 
 ## Dependencies
 This service needs the sapjco3.jar and a native lib according to the system OS.
+
+This service requires now Java 17 or later!
+
 You can put both files into the folder of the saprfcproxyserver-{version}.jar.
 
 Please download both from the SAP support: [SAP JCo download](https://support.sap.com/en/product/connectors/jco.html)
@@ -27,7 +30,7 @@ The example log file creates a log file service.log in the sub dir log/ and roll
 
 # Start the service
 
-```java -Dlog4j2.configurationFile=log4j2.xml -jar saprfcproxyserver-2.3.jar```
+```java -Dlog4j2.configurationFile=log4j2.xml -jar saprfcproxyserver-3.0.jar```
 
 Help page output with parameter -h or --help
 
@@ -105,13 +108,13 @@ Only the attributes: tableName and fields is mandatory. Attributes filter, offse
 ```
 {
   "destination":{
-  "destinationType":"application_server",
-  "host":"192.168.2.34",
-  "client":"003",
-  "systemNumber":"03",
-  "language":"DE",
-  "user":"your-user",
-  "password":"your-password"
+     "destinationType":"application_server",
+     "host":"192.168.2.34",
+     "client":"003",
+     "systemNumber":"03",
+     "language":"DE",
+     "user":"your-user",
+     "password":"your-password"
   },
   "tableName":"KNB1",
   "fields":["KUNNR","BUKRS"],
