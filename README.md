@@ -108,13 +108,13 @@ Only the attributes: tableName and fields is mandatory. Attributes filter, offse
 ```
 {
   "destination":{
-  "destinationType":"application_server",
-  "host":"192.168.2.34",
-  "client":"003",
-  "systemNumber":"03",
-  "language":"DE",
-  "user":"your-user",
-  "password":"your-password"
+     "destinationType":"application_server",
+     "host":"192.168.2.34",
+     "client":"003",
+     "systemNumber":"03",
+     "language":"DE",
+     "user":"your-user",
+     "password":"your-password"
   },
   "tableName":"KNB1",
   "fields":["KUNNR","BUKRS"],
