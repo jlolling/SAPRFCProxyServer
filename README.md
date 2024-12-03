@@ -27,7 +27,7 @@ The example log file creates a log file service.log in the sub dir log/ and roll
 
 # Start the service
 
-```java -Dlog4j2.configurationFile=log4j2.xml -jar saprfcproxyserver-2.3.jar```
+```java -Dlog4j2.configurationFile=log4j2.xml -jar saprfcproxyserver-3.0.jar```
 
 Help page output with parameter -h or --help
 
