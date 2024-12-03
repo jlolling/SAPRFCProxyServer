@@ -12,6 +12,9 @@ The request contains sensible information which must be protected.
 
 ## Dependencies
 This service needs the sapjco3.jar and a native lib according to the system OS.
+
+This service requires now Java 17 or later!
+
 You can put both files into the folder of the saprfcproxyserver-{version}.jar.
 
 Please download both from the SAP support: [SAP JCo download](https://support.sap.com/en/product/connectors/jco.html)
