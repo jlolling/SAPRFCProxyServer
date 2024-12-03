@@ -35,7 +35,7 @@ public class ShutdownServlet extends SAPRFCServlet {
 		writer.write("Shutdown server...");
 		writer.close();
 		try {
-			Main.server.stop();
+			Main.stop();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

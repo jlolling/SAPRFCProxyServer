@@ -29,9 +29,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.FilterHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 
 import io.prometheus.client.hotspot.DefaultExports;
 
@@ -107,6 +107,7 @@ public class Main {
     	options.addOption("h", "help", false, "Print help to console, do nothing else.");
     	options.addOption("b", "buckets", true, "Buckets for measure and count the request durations");
     	options.addOption("c", "chunking", false, "Force chunking (true | false, default=true)");
+//    	options.addOption("f", "propertiesFile", false, "Properties file");
     	CommandLineParser parser = new DefaultParser();
     	CommandLine cmd = parser.parse( options, args);
     	String portStr = cmd.getOptionValue('p', "9999");
@@ -129,7 +130,7 @@ public class Main {
 			formatter.printHelp("java -Dlog4j.configurationFile=log4j2.xml -jar saprfcproxyserver-" + version + ".jar", options);
 			System.exit(4);
     	}
-    	propertiesFileDir = cmd.getOptionValue('d');
+//    	propertiesFileDir = cmd.getOptionValue('f');
     	buckets = cmd.getOptionValue('b');
     	String forceChunkingStr = cmd.getOptionValue('c');
     	forceChunking = (forceChunkingStr != null && "true".equals(forceChunkingStr));
