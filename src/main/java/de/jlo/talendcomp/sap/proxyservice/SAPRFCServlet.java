@@ -25,7 +25,6 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.ee10.servlet.DefaultServlet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -46,7 +45,7 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 	private Driver driver = null;
 	protected final static ObjectMapper objectMapper = new ObjectMapper();
 	protected boolean logStatements = false;
-	private Map<String, Properties> mapDestinationProperties = new HashMap<>();
+	private Map<String, Properties> mapDestinationProperties = new HashMap<String, Properties>();
 	private String propertyFileDir = null;
 
 	public void setup() throws UnavailableException {
@@ -79,81 +78,6 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 		this.logStatements = logStatements;
 	}
 
-	protected JsonNode getJsonNode(JsonNode node, String attribute) {
-		if (node == null) {
-			throw new IllegalArgumentException("Node name cannot be null");
-		}
-		if (attribute == null || attribute.trim().isEmpty()) {
-			throw new IllegalArgumentException("attribute name cannot be null or empty");
-		}
-		JsonNode n = node.get(attribute);
-		if (n != null && n.isNull() == false && n.isMissingNode() == false) {
-			return n;
-		} else {
-			return null;
-		}
-	}
-
-	protected String getStringValue(JsonNode node, String attribute) {
-		if (node == null) {
-			throw new IllegalArgumentException("Node name cannot be null");
-		}
-		if (attribute == null || attribute.trim().isEmpty()) {
-			throw new IllegalArgumentException("attribute name cannot be null or empty");
-		}
-		JsonNode n = getJsonNode(node, attribute);
-		if (n != null) {
-			return n.asText();
-		} else {
-			return null;
-		}
-	}
-
-	protected Integer getIntegerValue(JsonNode node, String attribute) {
-		if (node == null) {
-			throw new IllegalArgumentException("Node name cannot be null");
-		}
-		if (attribute == null || attribute.trim().isEmpty()) {
-			throw new IllegalArgumentException("attribute name cannot be null or empty");
-		}
-		JsonNode n = getJsonNode(node, attribute);
-		if (n != null) {
-			return n.intValue();
-		} else {
-			return null;
-		}
-	}
-
-	protected Double getDoubleValue(JsonNode node, String attribute) {
-		if (node == null) {
-			throw new IllegalArgumentException("Node name cannot be null");
-		}
-		if (attribute == null || attribute.trim().isEmpty()) {
-			throw new IllegalArgumentException("attribute name cannot be null or empty");
-		}
-		JsonNode n = getJsonNode(node, attribute);
-		if (n != null) {
-			return n.doubleValue();
-		} else {
-			return null;
-		}
-	}
-
-	protected Boolean getBooleanValue(JsonNode node, String attribute) {
-		if (node == null) {
-			throw new IllegalArgumentException("Node name cannot be null");
-		}
-		if (attribute == null || attribute.trim().isEmpty()) {
-			throw new IllegalArgumentException("attribute name cannot be null or empty");
-		}
-		JsonNode n = getJsonNode(node, attribute);
-		if (n != null) {
-			return n.asBoolean();
-		} else {
-			return null;
-		}
-	}
-
 	protected Destination createDestination(String payload) throws ServiceException {
 		if (logStatements) {
 			info(payload);
@@ -168,7 +92,7 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 				throw new ServiceException(400, "Invalid payload: " + e1.getMessage(), e1);
 			}
 			ObjectNode destNode = (ObjectNode) root.get("destination");
-			String destinationName = getStringValue(destNode, "destinationName");
+			String destinationName = JsonUtil.getStringValue(destNode, "destinationName");
 			String type = null;
 			String password = null;
 			String host = null;
@@ -200,19 +124,19 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 				systemNumber = destinationProps.getProperty("systemNumber");
 			} else {
 				// take parameters for destination from the payload
-				type = getStringValue(destNode, "destinationType");
-				password = getStringValue(destNode, "password");
+				type = JsonUtil.getStringValue(destNode, "destinationType");
+				password = JsonUtil.getStringValue(destNode, "password");
 				if (password == null || password.trim().isEmpty()) {
 					throw new ServiceException(400, "Password not set");
 				}
 				password = TalendContextPasswordUtil.decryptPassword(password);
-				host = getStringValue(destNode, "host");
-				client = getStringValue(destNode, "client");
-				user = getStringValue(destNode, "user");
-				language = getStringValue(destNode, "language");
-				group = getStringValue(destNode, "group");
-				r3Name = getStringValue(destNode, "r3name");
-				systemNumber = getStringValue(destNode, "systemNumber");
+				host = JsonUtil.getStringValue(destNode, "host");
+				client = JsonUtil.getStringValue(destNode, "client");
+				user = JsonUtil.getStringValue(destNode, "user");
+				language = JsonUtil.getStringValue(destNode, "language");
+				group = JsonUtil.getStringValue(destNode, "group");
+				r3Name = JsonUtil.getStringValue(destNode, "r3name");
+				systemNumber = JsonUtil.getStringValue(destNode, "systemNumber");
 			}
 			ConnectionProperties connProps = null;
 			if ("message_server".equals(type)) {

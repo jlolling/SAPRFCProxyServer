@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Jan Lolling jan.lolling@gmail.com
+ * Copyright 2025 Jan Lolling jan.lolling@gmail.com
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,12 +54,13 @@ public class PrometheusMetricsFilter implements Filter {
             builder = builder.buckets(buckets);
         }
         histogram = builder
-                .help("Request duration")
-                .name("duration")
+                .help("Service request duration")
+                .name("service_request_duration")
                 .register();
-        statusCounter = Counter.build("request_status_total", "HTTP status codes of requests")
+        statusCounter = Counter.build("service_request_status_total", "HTTP status codes of requests")
                 .labelNames("path", "method", "status")
                 .register();
+		new ServiceInfoExports().register();
     }
 
     @Override
@@ -72,18 +73,18 @@ public class PrometheusMetricsFilter implements Filter {
         String requestUri = httpRequest.getRequestURI();
         boolean measureIt = false; 
         if (requestUri != null) {
-        	measureIt = requestUri.contains("/tableinput") || requestUri.contains("/sap-ping");
+        		measureIt = requestUri.contains("/tableinput") || requestUri.contains("/sap-ping");
         }
         MetricData data = null;
-    	if (measureIt) {
-    		data = startTimer(httpRequest);
-    	}
+	    	if (measureIt) {
+	    		data = startTimer(httpRequest);
+	    	}
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
-        	if (data != null) {
-            	observeDuration(data, (HttpServletResponse) servletResponse);
-        	}
+	        	if (data != null) {
+	            	observeDuration(data, (HttpServletResponse) servletResponse);
+	        	}
         }
     }
 
@@ -117,9 +118,9 @@ public class PrometheusMetricsFilter implements Filter {
         if (stripContextPath) {
             path = path.substring(request.getContextPath().length());
         }
-        String components = getComponents(path);
-        String method = request.getMethod();
-        Histogram.Timer timer = histogram.labels(components, method).startTimer();
+        final String components = getComponents(path);
+        final String method = request.getMethod();
+        final Histogram.Timer timer = histogram.labels(components, method).startTimer();
         return new MetricData(components, method, timer);
     }
 
@@ -128,7 +129,7 @@ public class PrometheusMetricsFilter implements Filter {
      * {@code jakarta.servlet.Filter.doFilter()}.
      */
     public void observeDuration(MetricData data, HttpServletResponse resp) {
-        String status = Integer.toString(resp.getStatus());
+        final String status = Integer.toString(resp.getStatus());
         data.timer.observeDuration();
         statusCounter.labels(data.components, data.method, status).inc();
     }

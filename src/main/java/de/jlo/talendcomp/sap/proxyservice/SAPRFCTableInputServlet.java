@@ -70,12 +70,12 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 				sendError(resp, e1.getStatusCode(), e1.getMessage());
 				return;
 			}
-			String tableName = getStringValue(root, "tableName");
+			String tableName = JsonUtil.getStringValue(root, "tableName");
 			if (tableName == null || tableName.trim().isEmpty()) {
 				sendError(resp, 400, "Parameter tableName is not set");
 				return;
 			}
-			JsonNode fields = getJsonNode(root, "fields");
+			JsonNode fields = JsonUtil.getJsonNode(root, "fields");
 			if (fields == null) {
 				sendError(resp, 400, "Fields not set");
 				return;
@@ -95,7 +95,7 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 			for (String f : fieldList) {
 				tableInput.addField(f);
 			}
-			String filter = getStringValue(root, "filter");
+			String filter = JsonUtil.getStringValue(root, "filter");
 			tableInput.setFilter(filter);
 			try {
 				tableInput.prepare();
@@ -103,12 +103,12 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 				sendError(resp, 500, "Prepare function failed: " + e.getMessage());
 				return;
 			}
-			Integer offset = getIntegerValue(root, "offset");
+			Integer offset = JsonUtil.getIntegerValue(root, "offset");
 			tableInput.setRowsToSkip(offset);
-			Integer limit = getIntegerValue(root, "limit");
+			Integer limit = JsonUtil.getIntegerValue(root, "limit");
 			tableInput.setMaxRows(limit);
 			final Writer out = resp.getWriter();
-			final Integer keepAliveSeconds = getIntegerValue(root, "keepAliveSeconds");
+			final Integer keepAliveSeconds = JsonUtil.getIntegerValue(root, "keepAliveSeconds");
 			Thread keepAliveThread = null;
 			if (keepAliveSeconds != null && keepAliveSeconds > 0) {
 				keepAliveThread = new Thread() {

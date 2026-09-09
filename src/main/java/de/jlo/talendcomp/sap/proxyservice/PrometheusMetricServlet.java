@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Jan Lolling jan.lolling@gmail.com
+ * Copyright 2025 Jan Lolling jan.lolling@gmail.com
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class PrometheusMetricServlet extends DefaultServlet {
 		resp.setStatus(HttpServletResponse.SC_OK);
 		resp.setContentType(TextFormat.CONTENT_TYPE_004);
 
-		Writer writer = resp.getWriter();
+		final Writer writer = resp.getWriter();
 		try {
 			TextFormat.write004(writer, registry.filteredMetricFamilySamples(parse(req)));
 			writer.flush();
@@ -65,11 +65,11 @@ public class PrometheusMetricServlet extends DefaultServlet {
 	}
 
 	private Set<String> parse(HttpServletRequest req) {
-		String[] includedParam = req.getParameterValues("name[]");
+		final String[] includedParam = req.getParameterValues("name[]");
 		if (includedParam == null) {
 			return Collections.emptySet();
 		} else {
-			return new HashSet<String>(Arrays.asList(includedParam));
+			return new HashSet<>(Arrays.asList(includedParam));
 		}
 	}
 

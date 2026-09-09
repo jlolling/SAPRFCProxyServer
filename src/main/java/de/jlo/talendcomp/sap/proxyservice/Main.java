@@ -43,7 +43,7 @@ public class Main {
 	private static boolean verbose = false;
 	private static String propertiesFileDir = null;
 	private static String buckets = null;
-	private static String version = null;
+	protected static String version = null;
 	private static boolean forceChunking = true;
 
 	public static void start() throws Exception {
