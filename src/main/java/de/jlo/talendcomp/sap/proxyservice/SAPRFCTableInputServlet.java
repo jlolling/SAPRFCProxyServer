@@ -54,9 +54,6 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 	}
 	
 	private void performQuery(String payload, HttpServletResponse resp) throws ServletException, IOException {
-		if (logStatements) {
-			info(payload);
-		}
 		if (payload == null || payload.trim().isEmpty()) {
 			sendError(resp, 400, "No payload received");
 			return;
@@ -141,18 +138,26 @@ public class SAPRFCTableInputServlet extends SAPRFCServlet {
 				};		
 				keepAliveThread.start();
 			}
+			Exception executeException = null;
 			try {
 				tableInput.execute();
 			} catch (Exception e) {
-				sendError(resp, 500, "Execute function failed: " + e.getMessage());
-				return;
+				executeException = e;
 			} finally {
+				// the keep-alive thread must be finished before we write to the response
 				if (keepAliveThread != null) {
-					if (keepAliveThread.isAlive()) {
-						keepAliveThread.interrupt();
+					keepAliveThread.interrupt();
+					try {
+						keepAliveThread.join();
+					} catch (InterruptedException ie) {
+						Thread.currentThread().interrupt();
 					}
 					keepAliveThread = null;
 				}
+			}
+			if (executeException != null) {
+				sendError(resp, 500, "Execute function failed: " + executeException.getMessage());
+				return;
 			}
 			if (logStatements) {
 				info(tableInput.getFunctionDescription());

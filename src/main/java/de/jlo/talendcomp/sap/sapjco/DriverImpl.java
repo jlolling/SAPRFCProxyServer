@@ -25,6 +25,13 @@ public class DriverImpl implements Driver {
 	
 	private static boolean providerRegistered = false;
 
+	private static synchronized void registerProvider() {
+		if (providerRegistered == false) {
+			com.sap.conn.jco.ext.Environment.registerDestinationDataProvider(ProxyDestinationDataProvider.getInstance());
+			providerRegistered = true;
+		}
+	}
+
 	@Override
 	public Destination getDestination(ConnectionProperties connProp) throws Exception {
 		DestinationImpl d = new DestinationImpl(getJCoDestination(connProp));
@@ -41,10 +48,7 @@ public class DriverImpl implements Driver {
 			throw new IllegalStateException("Connection properties are null and not created before");
 		}
 		connProp.build();
-		if (providerRegistered == false) {
-			com.sap.conn.jco.ext.Environment.registerDestinationDataProvider(ProxyDestinationDataProvider.getInstance());
-			providerRegistered = true;
-		}
+		registerProvider();
 		ProxyDestinationDataProvider.getInstance().setConnectionProperties(connProp);
 		// JCoDestinationManager will use the register MyDestinationDataProvider
 		com.sap.conn.jco.JCoDestination dest = com.sap.conn.jco.JCoDestinationManager.getDestination(connProp.getDestinationName());

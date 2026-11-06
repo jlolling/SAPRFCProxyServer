@@ -17,6 +17,7 @@ package de.jlo.talendcomp.sap.proxyservice;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.net.InetAddress;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,9 +29,13 @@ public class ShutdownServlet extends SAPRFCServlet {
 
 	@Override
 	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		info("Shutdown request received");
+		info("Shutdown request received from: " + req.getRemoteAddr());
+		if (isLocalRequest(req) == false) {
+			sendError(resp, 403, "Shutdown is only allowed from localhost");
+			return;
+		}
 		resp.setStatus(200);
-		resp.setContentType("test/plain");
+		resp.setContentType("text/plain");
 		Writer writer = resp.getWriter();
 		writer.write("Shutdown server...");
 		writer.close();
@@ -38,6 +43,21 @@ public class ShutdownServlet extends SAPRFCServlet {
 			Main.stop();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Only direct requests from the loopback interface are allowed.
+	 * Requests passed through a proxy (carrying forward headers) are rejected even if the proxy runs on localhost.
+	 */
+	private boolean isLocalRequest(HttpServletRequest req) {
+		if (req.getHeader("X-Forwarded-For") != null || req.getHeader("Forwarded") != null) {
+			return false;
+		}
+		try {
+			return InetAddress.getByName(req.getRemoteAddr()).isLoopbackAddress();
+		} catch (Exception e) {
+			return false;
 		}
 	}
 
