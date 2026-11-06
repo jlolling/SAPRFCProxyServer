@@ -47,7 +47,9 @@ The service use per default port 9999
 # Stop the service
 You can simply kill the process or you can gracefully shutdown the service with the help of a REST client (like Talend API Tester or SoapUI). Please call the endpoint (below) and this will shutdown the service.
  
-```OPTIONS http://<yourserver>:<yourport>/shutdown```
+```OPTIONS http://localhost:<yourport>/shutdown```
+
+For security reasons the shutdown is only accepted from localhost (loopback interface). Requests passed through a proxy (with X-Forwarded-For or Forwarded header) are rejected with status 403.
 
 # Endpoints
 All endpoints expects application/json as Content-Type

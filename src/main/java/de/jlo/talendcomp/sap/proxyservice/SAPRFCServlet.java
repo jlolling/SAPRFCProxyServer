@@ -16,6 +16,7 @@
 package de.jlo.talendcomp.sap.proxyservice;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -154,10 +155,19 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 		}
 	}
 
-	protected Destination createDestination(String payload) throws ServiceException {
-		if (logStatements) {
-			info(payload);
+	/**
+	 * Returns the payload as string with the destination password masked, suitable for logging
+	 */
+	protected String maskPassword(ObjectNode root) {
+		ObjectNode copy = root.deepCopy();
+		JsonNode destNode = copy.get("destination");
+		if (destNode instanceof ObjectNode && destNode.has("password")) {
+			((ObjectNode) destNode).put("password", "*****");
 		}
+		return copy.toString();
+	}
+
+	protected Destination createDestination(String payload) throws ServiceException {
 		if (payload == null || payload.trim().isEmpty()) {
 			throw new ServiceException(400, "No payload received");
 		} else {
@@ -166,6 +176,9 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 				root = (ObjectNode) objectMapper.readTree(payload);
 			} catch (JsonProcessingException e1) {
 				throw new ServiceException(400, "Invalid payload: " + e1.getMessage(), e1);
+			}
+			if (logStatements) {
+				info(maskPassword(root));
 			}
 			ObjectNode destNode = (ObjectNode) root.get("destination");
 			String destinationName = getStringValue(destNode, "destinationName");
@@ -249,6 +262,17 @@ public abstract class SAPRFCServlet extends DefaultServlet {
 	
 	public void sendError(HttpServletResponse resp, int code, String message) {
 		log.error(this.getClass().getSimpleName() + ": code: " + code + " message: " + message);
+		if (resp.isCommitted()) {
+			// status and headers are already sent (e.g. by the keep-alive output), we can only append the error to the body
+			try {
+				Writer out = resp.getWriter();
+				out.write("\nerror: code: " + code + " message: " + message + "\n");
+				out.flush();
+			} catch (Exception e) {
+				log.error("Write error to already committed response failed: " + e.getMessage());
+			}
+			return;
+		}
 		try {
 			resp.sendError(code, message);
 		} catch (IOException e) {

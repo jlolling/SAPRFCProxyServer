@@ -49,7 +49,7 @@ public class ApplicationServerProperties implements ConnectionProperties {
 		if (systemNumber == null) {
 			throw new Exception("systemNumber not set!");
 		}
-		destinationName = user + language + host + client + systemNumber;
+		destinationName = user + language + host + client + systemNumber + ConnectionProperties.hashPassword(password);
 		properties = new Properties();
         properties.setProperty(JCO_USER, user);
         properties.setProperty(JCO_PASSWD, password);

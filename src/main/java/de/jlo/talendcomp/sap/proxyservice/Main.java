@@ -44,7 +44,7 @@ public class Main {
 	private static String propertiesFileDir = null;
 	private static String buckets = null;
 	private static String version = null;
-	private static boolean forceChunking = true;
+	private static boolean forceChunking = false;
 
 	public static void start() throws Exception {
 		if (port < 1) {
@@ -71,7 +71,7 @@ public class Main {
 		log.info("Add servlet: SAPRFCTableInputServlet at path: /tableinput");
 		context.addServlet(new ServletHolder(tableInputServlet), "/tableinput");
 		SAPRFCPingServlet pingServlet = new SAPRFCPingServlet();
-		tableInputServlet.setPropertyFileDir(propertiesFileDir);
+		pingServlet.setPropertyFileDir(propertiesFileDir);
 		pingServlet.setup();
 		pingServlet.setLogStatements(verbose);
 		context.addServlet(new ServletHolder(pingServlet), "/sap-ping");
@@ -106,7 +106,7 @@ public class Main {
     	options.addOption("v", "verbose", false, "Print statements to console");
     	options.addOption("h", "help", false, "Print help to console, do nothing else.");
     	options.addOption("b", "buckets", true, "Buckets for measure and count the request durations");
-    	options.addOption("c", "chunking", false, "Force chunking (true | false, default=true)");
+    	options.addOption("c", "chunking", false, "Force chunking (omitted per default)");
 //    	options.addOption("f", "propertiesFile", false, "Properties file");
     	CommandLineParser parser = new DefaultParser();
     	CommandLine cmd = parser.parse( options, args);
@@ -132,8 +132,7 @@ public class Main {
     	}
 //    	propertiesFileDir = cmd.getOptionValue('f');
     	buckets = cmd.getOptionValue('b');
-    	String forceChunkingStr = cmd.getOptionValue('c');
-    	forceChunking = (forceChunkingStr != null && "true".equals(forceChunkingStr));
+    	forceChunking = cmd.hasOption('c');
     	log.info("Configuring SAP RFC Proxy Server (version " + version + ") at port: " + port);
     	start();
 	}

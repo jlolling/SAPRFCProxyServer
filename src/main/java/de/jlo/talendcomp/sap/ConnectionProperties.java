@@ -15,6 +15,9 @@
  */
 package de.jlo.talendcomp.sap;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 import java.util.Properties;
 
 public interface ConnectionProperties {
@@ -193,5 +196,18 @@ public interface ConnectionProperties {
 	 * build connection properties and destination name
 	 */
 	public void build() throws Exception;
+
+	/**
+	 * The password must be part of the destination name, otherwise a request with a wrong password
+	 * would reuse the already registered properties (containing the correct password) of a former request.
+	 * Only a hash is used to keep the password out of the name (JCo uses the name e.g. in logs and traces).
+	 * 
+	 * @param password
+	 * @return SHA-256 hex hash of the password
+	 */
+	public static String hashPassword(String password) throws Exception {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		return HexFormat.of().formatHex(md.digest(password.getBytes(StandardCharsets.UTF_8)));
+	}
 
 }

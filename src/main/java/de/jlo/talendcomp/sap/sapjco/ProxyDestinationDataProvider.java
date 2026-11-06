@@ -15,9 +15,9 @@
  */
 package de.jlo.talendcomp.sap.sapjco;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.conn.jco.ext.DataProviderException;
 import com.sap.conn.jco.ext.DestinationDataEventListener;
@@ -33,7 +33,7 @@ import de.jlo.talendcomp.sap.ConnectionProperties;
  */
 public class ProxyDestinationDataProvider implements DestinationDataProvider  {
 	
-	private Map<String, Properties> propertiesMap = new HashMap<>();
+	private final Map<String, Properties> propertiesMap = new ConcurrentHashMap<>();
 	private static ProxyDestinationDataProvider instance = null;
 	private static Object lock = new Object();
 	
@@ -57,9 +57,7 @@ public class ProxyDestinationDataProvider implements DestinationDataProvider  {
 	 * @param cp 
 	 */
 	public void setConnectionProperties(ConnectionProperties cp) {
-		if (propertiesMap.containsKey(cp.getDestinationName()) == false) {
-			propertiesMap.put(cp.getDestinationName(), cp.getProperties());
-		}
+		propertiesMap.putIfAbsent(cp.getDestinationName(), cp.getProperties());
 	}
 	
 	@Override

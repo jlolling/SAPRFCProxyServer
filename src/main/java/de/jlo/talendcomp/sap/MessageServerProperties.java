@@ -53,7 +53,7 @@ public class MessageServerProperties implements ConnectionProperties {
 		if (group == null) {
 			throw new Exception("group not set!");
 		}
-		destinationName = user + language + host + client + r3Name + group;
+		destinationName = user + language + host + client + r3Name + group + ConnectionProperties.hashPassword(password);
 		properties = new Properties();
         properties.setProperty(JCO_USER, user);
         properties.setProperty(JCO_PASSWD, password);
